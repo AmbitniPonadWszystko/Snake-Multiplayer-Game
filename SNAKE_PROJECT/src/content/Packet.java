@@ -32,5 +32,13 @@ public class Packet {
         public int x4,y4;
         public int count;
     }
-  
+   public static class PacketNewTour{
+        public int x1,y1, score1;
+        public int x2,y2, score2;
+        public int x3,y3, score3;
+        public int x4,y4, score4;
+        public int count, tour;
+    }
+    public static class PacketReadyPlayer{}
+    public static class PacketStart{}
 }

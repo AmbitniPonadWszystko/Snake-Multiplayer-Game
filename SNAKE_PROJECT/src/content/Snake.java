@@ -21,6 +21,8 @@ import java.util.concurrent.Semaphore;
 import javafx.application.Platform;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
+import static content.GraphicalInterface.*;
+import javafx.geometry.Insets;
 
 /**
  * Created by Michał Martyniak and company :P on 19.03.2016.
@@ -30,7 +32,10 @@ public class Snake extends Listener {
     private static final Semaphore sem = new Semaphore(1);
     private final static int sizeWidth = 120;          //Width of our Label board
     private final static int sizeHeight = 60;
+    
     public static Label[][] board = new Label[sizeWidth][sizeHeight];
+    public static Label[] scores = new Label[4];
+    public static Label tour;
     public static BarrierType[][] mask = new BarrierType[sizeWidth][sizeHeight];
     static Map<Integer, MPPlayer> players = new HashMap<Integer, MPPlayer>();
 
@@ -53,9 +58,19 @@ public class Snake extends Listener {
     private Image player2;
     private Image player3;
     private Image player4;
+    private Image bg;
+    
+    private GraphicalInterface gui;
+    private boolean ready;
+    private boolean start;
+    
+    private KeyCode temKey;
 
     /*  create snake that has ony HEAD with given coordinates   */
-    public Snake() {
+    public Snake(GraphicalInterface graphicalInterface) {
+        ready=false;
+        start=false;
+        gui=graphicalInterface;
         scanner = new Scanner(System.in);
         actualTranslation = new Point(0, 0);
         client = new Client();
@@ -68,7 +83,7 @@ public class Snake extends Listener {
         try {
             Log.info("Please Enter the IP");
             // 1 timeout, 2 - IP, 3 - PORT
-            client.connect(500000000, "192.168.0.100", 7474, 7474);
+            client.connect(500000000, "localhost", 7474, 7474);
         } catch (Exception ex) {
             ex.printStackTrace();
             client.stop();
@@ -82,7 +97,8 @@ public class Snake extends Listener {
         points = 0;
         //playerName=name;
         lifeStatus = LifeStatus.ALIVE;            //snake is alive
-
+        int[] temp=new int[4];
+        initScoreAndTour(temp, 1);
     }
 
     public void initImages() {
@@ -90,16 +106,22 @@ public class Snake extends Listener {
         player2 = new Image(getClass().getResourceAsStream("resources/red.png"));
         player3 = new Image(getClass().getResourceAsStream("resources/yellow.png"));
         player4 = new Image(getClass().getResourceAsStream("resources/grey.png"));
+        bg = new Image(getClass().getResourceAsStream("resources/bg.png"));
+        
     }
 
     public void sendPoint() {
-        PacketPoint p = new PacketPoint();
-        p.x = head.x + actualTranslation.x;
-        p.y = head.y + actualTranslation.y;
-        p.id = 0;
-        client.sendTCP(p);
+        if(lifeStatus==LifeStatus.ALIVE && start==true){
+            PacketPoint p = new PacketPoint();
+            p.x = head.x + actualTranslation.x;
+            p.y = head.y + actualTranslation.y;
+            p.id = connectionID;
+            client.sendTCP(p);
+            
         //universal statement considering all cases of movement
-
+        }
+        else
+            System.out.println("czeka");
     }
 
 
@@ -116,22 +138,35 @@ public class Snake extends Listener {
             case L:
                 lifeStatus = LifeStatus.RESIGNED;   //Snake gave up completely in that round
                 body.remove(body.size() - 1);       //! if adding head to body list was inappropriate
+                temKey=lastKey;
                 return;                             //EXIT whole method, no further instructions must be executed!
             case W:
                 actualTranslation.y = -1;            //one up
+                temKey=lastKey;
                 sendPoint();
                 break;
             case S:
                 actualTranslation.y = 1;             //one down
+                temKey=lastKey;
                 sendPoint();
                 break;
             case A:
                 actualTranslation.x = -1;            //one left
+                temKey=lastKey;
                 sendPoint();
                 break;
             case D:
                 actualTranslation.x = 1;             //one right
+                temKey=lastKey;
                 sendPoint();
+                break;
+            case R:
+                lastKey=temKey;
+                if(!ready){
+                    PacketReadyPlayer ready=new PacketReadyPlayer();            //one right
+                    client.sendUDP(ready);
+                    this.ready=true;
+                }
                 break;
             default:                                 //no key - skip that method
                 return;
@@ -194,6 +229,9 @@ public class Snake extends Listener {
         kryo.register(Packet.PacketDead.class);
         kryo.register(Packet.PacketAddPlayer.class);
         kryo.register(Packet.PacketHead.class);
+        kryo.register(Packet.PacketNewTour.class);
+        kryo.register(Packet.PacketReadyPlayer.class);
+        kryo.register(Packet.PacketStart.class);
     }
 
     public void connected(Connection cnctn) {
@@ -204,15 +242,39 @@ public class Snake extends Listener {
     public void disconnected(Connection cnctn) {
         Log.info("[CLIENT] You have disconnected.");
     }
+    private void setter(Label label, int position){
+        infoGridPane.setConstraints(label,0,0);
+        infoGridPane.setMargin(label,new Insets(0,0,0,position));
+        infoGridPane.getChildren().add(label);
+    
+    }
+    public void removeScoreAndTour(){
+        for (int i = 0; i < 4; i++) {
+            infoGridPane.getChildren().remove(scores[i]);
+        }
+        infoGridPane.getChildren().remove(tour);
+    }
+    public void initScoreAndTour(int[] sc, int t){
+        for(int i=0; i<4; i++){
+            scores[i] = new Label((new Integer(sc[i])).toString());
+            setter(scores[i],220+i*265);          
+        } 
+        tour = new Label("tura: "+ (new Integer(t)).toString());
+        setter(tour,1100);
+    
+    
+    }
 
     public void received(Connection c, Object o) {
         if (o instanceof Packet.PacketLoginAccepted) {
             boolean answer = ((Packet.PacketLoginAccepted) o).accepted;
 
             if (answer) {
-                Log.info("Log success"); //<--------------------------------------?tak to sie pisze?               
-            } else {
+                Log.info("Log success");              
+            } else {                
                 c.close();
+                Log.info("Too many players");
+                System.exit(0);
             }
 
         }
@@ -224,7 +286,11 @@ public class Snake extends Listener {
         if (o instanceof Packet.PacketDead) {
             lifeStatus = LifeStatus.DEAD;
         }
-
+        if (o instanceof Packet.PacketStart) {
+            start=true;
+            sendPoint();
+            Log.info("startuje");
+        }
         if (o instanceof Packet.PacketAddPlayer) {
             PacketAddPlayer packet = (PacketAddPlayer) o;
             MPPlayer newPlayer = new MPPlayer();
@@ -241,6 +307,67 @@ public class Snake extends Listener {
                 image = player4;
             }
 
+        }
+        
+        if (o instanceof PacketNewTour){
+               
+               Log.info("New Tour");
+               int[] sc=new int[4];
+               sc[2]=((PacketNewTour) o).score1;
+               sc[0]=((PacketNewTour) o).score2;
+               sc[3]=((PacketNewTour) o).score3;
+               sc[1]=((PacketNewTour) o).score4;
+               
+            
+               Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    removeScoreAndTour();
+                    initScoreAndTour(sc, ((PacketNewTour) o).tour);
+                    ready=false;
+                    start=false;
+
+                    switch (connectionID) {
+                        case 1:
+                            head.x=((PacketNewTour) o).x1;
+                            head.y=((PacketNewTour) o).y1;
+                            break;
+                        case 2:
+                            head.x=((PacketNewTour) o).x2;
+                            head.y=((PacketNewTour) o).y2;
+                            break;
+                        case 3:
+                            head.x=((PacketNewTour) o).x3;
+                            head.y=((PacketNewTour) o).y3;
+                            break;
+                        case 4: 
+                            head.x=((PacketNewTour) o).x4;
+                            head.y=((PacketNewTour) o).y4;
+                            break;
+                        default:
+                            break;
+                    }
+               
+                    
+                    for (int x = 1; x < sizeWidth-1; x++) {
+                        for (int y = 1; y < sizeHeight-1; y++) {
+                                board[x][y].setGraphic(new ImageView(bg));
+                        }
+                    }
+                    board[((PacketNewTour) o).x1][((PacketNewTour) o).y1].setGraphic(new ImageView(player1));
+                    if(((PacketNewTour) o).count>1)
+                        board[((PacketNewTour) o).x2][((PacketNewTour) o).y2].setGraphic(new ImageView(player2));
+                    if(((PacketNewTour) o).count>2)
+                        board[((PacketNewTour) o).x3][((PacketNewTour) o).y3].setGraphic(new ImageView(player3));
+                    if(((PacketNewTour) o).count>3)
+                        board[((PacketNewTour) o).x4][((PacketNewTour) o).y4].setGraphic(new ImageView(player4));
+                    lifeStatus=LifeStatus.ALIVE;
+                    //sendPoint();
+                    //considerAction();
+                    lastKey = KeyCode.K; 
+                    
+                }
+            });
         }
 
         //Points for another snakes
@@ -286,6 +413,7 @@ public class Snake extends Listener {
                         int x1 = ((PacketHead) o).x1;
                         int y1 = ((PacketHead) o).y1;
                         board[x1][y1].setGraphic(new ImageView(player1));
+                       // board[0][0].setGraphic(new ImageView(player2));
                     }
                     if (c1 >= 2) {
                         int x2 = ((PacketHead) o).x2;
