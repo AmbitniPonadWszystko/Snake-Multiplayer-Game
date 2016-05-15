@@ -3,13 +3,12 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/Mateusz/Desktop/SNAKE_PROJECT/src/content/MPPlayer.java</file>
-            <file>file:/C:/Users/Mateusz/Desktop/SNAKE_PROJECT/src/content/Enums.java</file>
-            <file>file:/C:/Users/Mateusz/Desktop/SNAKE_PROJECT/src/content/resources/infoBar.png</file>
-            <file>file:/C:/Users/Mateusz/Desktop/SNAKE_PROJECT/src/content/Snake.java</file>
-            <file>file:/C:/Users/Mateusz/Desktop/SNAKE_PROJECT/src/content/Packet.java</file>
-            <file>file:/C:/Users/Mateusz/Desktop/SNAKE_PROJECT/src/content/PeripheralWall.java</file>
-            <file>file:/C:/Users/Mateusz/Desktop/SNAKE_PROJECT/src/content/GraphicalInterface.java</file>
+            <file>file:/C:/Users/Ada/Documents/NetBeansProjects/Snake-Multiplayer-Game-master/SNAKE_PROJECT/src/content/Packet.java</file>
+            <file>file:/C:/Users/Ada/Documents/NetBeansProjects/Snake-Multiplayer-Game-master/SNAKE_PROJECT/src/content/MPPlayer.java</file>
+            <file>file:/C:/Users/Ada/Documents/NetBeansProjects/Snake-Multiplayer-Game-master/SNAKE_PROJECT/src/content/PeripheralWall.java</file>
+            <file>file:/C:/Users/Ada/Documents/NetBeansProjects/Snake-Multiplayer-Game-master/SNAKE_PROJECT/src/content/GraphicalInterface.java</file>
+            <file>file:/C:/Users/Ada/Documents/NetBeansProjects/Snake-Multiplayer-Game-master/SNAKE_PROJECT/src/content/Enums.java</file>
+            <file>file:/C:/Users/Ada/Documents/NetBeansProjects/Snake-Multiplayer-Game-master/SNAKE_PROJECT/src/content/Snake.java</file>
         </group>
     </open-files>
 </project-private>

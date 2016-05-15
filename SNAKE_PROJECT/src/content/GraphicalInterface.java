@@ -32,6 +32,8 @@ import java.awt.Point;
 import content.Enums.*;
 import static content.Snake.board;
 import static content.Snake.mask;
+import static content.Snake.scores;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
@@ -47,7 +49,7 @@ public class GraphicalInterface extends Application {
     //layouts
     private BorderPane borderPane;          //holds boardGridPane and infoGridPane within
     private GridPane boardGridPane;         //layout to store our labels(board)
-    private GridPane infoGridPane;              //layout for info bar at the top of the window
+    public static GridPane infoGridPane;              //layout for info bar at the top of the window
 
     //Important for FPS calculations
     private long previousFrameTime;         //time in nanosecond of the latest frame
@@ -55,7 +57,6 @@ public class GraphicalInterface extends Application {
     //important for game
     private Integer playerNumber = 4;
     private Integer tourNumber = 1;
-    //private Snake[] snakes = new Snake[playerNumber];
     private List<Point> inne2 = new ArrayList<>();
 
     private static final Semaphore sem = new Semaphore(1);
@@ -70,9 +71,9 @@ public class GraphicalInterface extends Application {
     //layout elements(childrens)
 
     //mask containing position of snakes, walls, etc
-    private Label[] names = new Label[playerNumber];
-    private Label[] scores = new Label[playerNumber];
-    private Label tour;
+    public static Label[] names = new Label[4];
+    //public static Label[] scores = new Label[4];
+    
     //-----------------------------
     //static
     private final static int infoBarHeight = 80;      //constant variable which determines InfoBar Height
@@ -86,7 +87,7 @@ public class GraphicalInterface extends Application {
     //----------------------------
     //methods
     /*  initializing just our board             */
-    private void initBoard(boolean refreshOnly) {
+    public void initBoard(boolean refreshOnly) {
 
         for (int x = 0; x < sizeWidth; x++) {
             for (int y = 0; y < sizeHeight; y++) {
@@ -127,15 +128,11 @@ public class GraphicalInterface extends Application {
             }
         }
     }
+    
 
     @Override                                //override javaFX native method
     public void init() {
-        //to change, need asking about names
-//        snakes[0] = new Snake (new Point (1,1), "Ada", cp.client);
-//        snakes[1] = new Snake (new Point (21,1), "Michal", cp.client);
-//        snakes[2] = new Snake (new Point (5,1), "Mateusz", cp.client);
-//        snakes[3] = new Snake (new Point (8,1), "Ania", cp.client);
-
+       
         //moved here because Hbox requires InfoBg to be initialized
         initImages();                   //call Images initialization for further use
 
@@ -161,7 +158,7 @@ public class GraphicalInterface extends Application {
         //'false' means - force allocating memory for labels
         //initLabelToGridAssignment();    //bind board tiles to proper place in grid
 //        initNames();
-//        initScoreAndTour();
+        
     }
 
     /* initializing walls*/
@@ -172,16 +169,7 @@ public class GraphicalInterface extends Application {
         }
     }
 
-    /*initalizing new tour*/
-    public void newTour() {
-        System.out.println("Round " + tourNumber + " ended");
-        tourNumber += 1;
-        for (int i = 0; i < playerNumber; i++) {
-            infoGridPane.getChildren().remove(scores[i]);
-        }
-        infoGridPane.getChildren().remove(tour);
-        //initScoreAndTour();
-    }
+  
 
     //IT IS TECHNICALLY OUR MAIN //(learned from documentation)
     @Override                               //override javaFX native method
@@ -192,7 +180,7 @@ public class GraphicalInterface extends Application {
 
         mainScene = new Scene(borderPane, windowWidth, windowHeight);//10 left padding, 40*20 tiles space, 10 right padding
 
-        Snake snake = new Snake();
+        Snake snake = new Snake(this);
         PeripheralWall peripheralWall = new PeripheralWall(sizeWidth, sizeHeight);
 
         //display wall only once

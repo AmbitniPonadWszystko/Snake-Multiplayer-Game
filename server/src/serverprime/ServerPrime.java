@@ -60,6 +60,9 @@ public class ServerPrime {
         kryo.register(Packet.PacketDead.class);
         kryo.register(Packet.PacketAddPlayer.class);
         kryo.register(Packet.PacketHead.class);
+        kryo.register(Packet.PacketNewTour.class);
+        kryo.register(Packet.PacketReadyPlayer.class);
+        kryo.register(Packet.PacketStart.class);
     }
 
     public static void main(String[] args) {
