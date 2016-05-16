@@ -54,18 +54,11 @@ public class GraphicalInterface extends Application {
     //Important for FPS calculations
     private long previousFrameTime;         //time in nanosecond of the latest frame
 
-    //important for game
-    private Integer playerNumber = 4;
-    private Integer tourNumber = 1;
-    private List<Point> inne2 = new ArrayList<>();
-
-    private static final Semaphore sem = new Semaphore(1);
-
+    
     //images
     private Image bg;                       //background
     private Image brick;                    //peripheral wall
     private Image infoBarBg;                //template from paint
-    private Image white;
     private final static int sizeWidth = 120;          //Width of our Label board
     private final static int sizeHeight = 60;         //Height our Label board
     //layout elements(childrens)
@@ -79,8 +72,8 @@ public class GraphicalInterface extends Application {
     private final static int infoBarHeight = 80;      //constant variable which determines InfoBar Height
 
     private static String windowName = "SNAKE - alpha compilation test";
-    private static int windowWidth = sizeWidth * 20;
-    private static int windowHeight = (sizeHeight * 20) + infoBarHeight; //how many round have to be done until the game ends
+    private static int windowWidth = sizeWidth * 10;
+    private static int windowHeight = (sizeHeight * 10) + infoBarHeight; //how many round have to be done until the game ends
 
     private static int fps = 4;             //how many frames/moves are in one second
 
@@ -94,11 +87,8 @@ public class GraphicalInterface extends Application {
 
                 if (!refreshOnly) {///important(if snake dies, we dont need to reallocate memory for labels
                     board[x][y] = new Label();
-                    board[x][y].setScaleX(0.5);
-                    board[x][y].setScaleY(0.5);
-                }//calling constructor
-                //board[x][y].setGraphic(new ImageView(bg));  //always fill board with background color
-                mask[x][y] = BarrierType.EMPTY;             //updating mask
+                    board[x][y].setMaxSize(0.5, 0.5);
+                }
                 GridPane.setConstraints(board[x][y], x, y);       //bind board tile to proper COLUMN and ROW in our grid
                 boardGridPane.getChildren().add(board[x][y]);   //finally add each of them
             }
@@ -120,19 +110,18 @@ public class GraphicalInterface extends Application {
     public void initMap() {
         for (int x = 0; x < sizeWidth; x++) {
             for (int y = 0; y < sizeHeight; y++) {
-                if (mask[x][y] == BarrierType.WALL) {
+                if(x==0||x==sizeWidth-1||y==0||y==sizeHeight-1)
                     board[x][y].setGraphic(new ImageView(brick)); // adding walls 
-                } else {
-                    board[x][y].setGraphic(new ImageView(bg));  //always fill board with background color
-                }
+                else
+                    board[x][y].setGraphic(new ImageView(bg));  //always fill board with background color    
+             
             }
         }
     }
     
 
     @Override                                //override javaFX native method
-    public void init() {
-       
+    public void init() {   
         //moved here because Hbox requires InfoBg to be initialized
         initImages();                   //call Images initialization for further use
 
@@ -143,7 +132,7 @@ public class GraphicalInterface extends Application {
 
         //CENTER
         boardGridPane = new GridPane();
-        boardGridPane.setPadding(new Insets(0, 0, 0, 0));    //0 pixel padding on each side
+        //boardGridPane.setPadding(new Insets(0, 0, 0, 0));    //0 pixel padding on each side
         boardGridPane.setVgap(-10);                         //vertical spacing between each label
         boardGridPane.setHgap(-10);                         //horizontal spacing
 
@@ -153,23 +142,9 @@ public class GraphicalInterface extends Application {
         borderPane.setTop(infoGridPane);
 
         initBoard(false);               //call board initialization method
-        initWalls(new PeripheralWall(sizeWidth, sizeHeight));
         initMap();
-        //'false' means - force allocating memory for labels
-        //initLabelToGridAssignment();    //bind board tiles to proper place in grid
-//        initNames();
         
     }
-
-    /* initializing walls*/
-    public void initWalls(PeripheralWall peripheralWall) {
-        for (Point w : peripheralWall.getWall()) {// 'w' means element
-            // board[w.x][w.y].setGraphic(new ImageView(brick)); // adding walls 
-            mask[w.x][w.y] = BarrierType.WALL; //upgrading mask
-        }
-    }
-
-  
 
     //IT IS TECHNICALLY OUR MAIN //(learned from documentation)
     @Override                               //override javaFX native method
@@ -177,13 +152,9 @@ public class GraphicalInterface extends Application {
 
         window = primaryStage;              //must-have assignment
         window.setTitle(windowName);        //window TITLE
-
         mainScene = new Scene(borderPane, windowWidth, windowHeight);//10 left padding, 40*20 tiles space, 10 right padding
-
         Snake snake = new Snake(this);
-        PeripheralWall peripheralWall = new PeripheralWall(sizeWidth, sizeHeight);
 
-        //display wall only once
         //EVENT FOR KEYBOARD
         EventHandler<KeyEvent> keyEventEventHandler = event -> {
             snake.setLastKey(event.getCode());    //call snake method, to filter the input and choose further direction
@@ -192,7 +163,6 @@ public class GraphicalInterface extends Application {
 
         //add event handler constructed right above this line to WHOLE WINDOW(mainScene)^
         mainScene.addEventHandler(KeyEvent.KEY_PRESSED, keyEventEventHandler);
-
         window.setScene(mainScene);
         window.show();                      //display mainScene on the window
 
@@ -214,9 +184,7 @@ public class GraphicalInterface extends Application {
                 // (because previousFrameTime is 0 before hitting the  if statement;
                 if (isProperFrame) {
                     if (isAlive) {
-
                         snake.considerAction();         //update snake's position
-
                     }
                     previousFrameTime = now;            //save current frame as older than next 'now' values
                 }

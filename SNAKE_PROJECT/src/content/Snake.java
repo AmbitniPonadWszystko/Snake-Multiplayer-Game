@@ -40,7 +40,6 @@ public class Snake extends Listener {
     static Map<Integer, MPPlayer> players = new HashMap<Integer, MPPlayer>();
 
     private Point head;             //coordinates of snake's head
-    private ArrayList<Point> body;  //holds body segments
     private KeyCode lastKey;        //direction variable, allow to continue snake's movement in that direction constantly
 
     private Integer points;             //player's points
@@ -66,7 +65,7 @@ public class Snake extends Listener {
     
     private KeyCode temKey;
 
-    /*  create snake that has ony HEAD with given coordinates   */
+
     public Snake(GraphicalInterface graphicalInterface) {
         ready=false;
         start=false;
@@ -75,7 +74,6 @@ public class Snake extends Listener {
         actualTranslation = new Point(0, 0);
         client = new Client();
 
-        //register packets
         register();
         initImages();
         client.addListener(this);
@@ -90,12 +88,8 @@ public class Snake extends Listener {
 
         }
 
-        //head = startingPoint;                     //head always exist
-        body = new ArrayList<>();                 //at the beginning body is empty
         lastKey = KeyCode.K;                      //no key is pressed at the beginning
-
         points = 0;
-        //playerName=name;
         lifeStatus = LifeStatus.ALIVE;            //snake is alive
         int[] temp=new int[4];
         initScoreAndTour(temp, 1);
@@ -105,7 +99,7 @@ public class Snake extends Listener {
         player1 = new Image(getClass().getResourceAsStream("resources/blue.png"));
         player2 = new Image(getClass().getResourceAsStream("resources/red.png"));
         player3 = new Image(getClass().getResourceAsStream("resources/yellow.png"));
-        player4 = new Image(getClass().getResourceAsStream("resources/grey.png"));
+        player4 = new Image(getClass().getResourceAsStream("resources/pink.png"));
         bg = new Image(getClass().getResourceAsStream("resources/bg.png"));
         
     }
@@ -117,18 +111,17 @@ public class Snake extends Listener {
             p.y = head.y + actualTranslation.y;
             p.id = connectionID;
             client.sendTCP(p);
-            
-        //universal statement considering all cases of movement
+
         }
         else
-            System.out.println("czeka");
+            System.out.println("Waiting...");
     }
 
 
     /*  changes the coordinates of snake's head (and convert old head to new body element)  */
     //change to boolean later(for collision)
     public void considerAction() {
-        //body.add(head);                             //save head as a body now
+        
         actualTranslation.x = 0;
         actualTranslation.y = 0;
         //temporary helper that doesn't move our snake yet!!
@@ -137,7 +130,6 @@ public class Snake extends Listener {
         switch (lastKey) {
             case L:
                 lifeStatus = LifeStatus.RESIGNED;   //Snake gave up completely in that round
-                body.remove(body.size() - 1);       //! if adding head to body list was inappropriate
                 temKey=lastKey;
                 return;                             //EXIT whole method, no further instructions must be executed!
             case W:
@@ -171,9 +163,6 @@ public class Snake extends Listener {
             default:                                 //no key - skip that method
                 return;
         }
-        //actualTranslation holds always direction to which snake is following
-        //move(actualTranslation); //wywalilem maske bitowa zrobic w domu dalej
-
     }
 
     /*  returns only head coordinates (useful for drawing)  */
@@ -204,12 +193,7 @@ public class Snake extends Listener {
         lifeStatus = value;
     }
 
-    /*  returns list of ALL coordinates that belong to that snake */
-    public ArrayList<Point> wholeSnake() {
-        ArrayList<Point> wholeSnakeList = body;
-        wholeSnakeList.add(head);
-        return wholeSnakeList;
-    }
+
 
     public void setLastKey(KeyCode key) {
         lastKey = key;
@@ -312,11 +296,11 @@ public class Snake extends Listener {
         if (o instanceof PacketNewTour){
                
                Log.info("New Tour");
-               int[] sc=new int[4];
-               sc[2]=((PacketNewTour) o).score1;
-               sc[0]=((PacketNewTour) o).score2;
-               sc[3]=((PacketNewTour) o).score3;
-               sc[1]=((PacketNewTour) o).score4;
+               int[] sc = new int[4];
+               sc[2] = ((PacketNewTour) o).score1;
+               sc[0] = ((PacketNewTour) o).score2;
+               sc[3] = ((PacketNewTour) o).score3;
+               sc[1] = ((PacketNewTour) o).score4;
                
             
                Platform.runLater(new Runnable() {
@@ -362,8 +346,6 @@ public class Snake extends Listener {
                     if(((PacketNewTour) o).count>3)
                         board[((PacketNewTour) o).x4][((PacketNewTour) o).y4].setGraphic(new ImageView(player4));
                     lifeStatus=LifeStatus.ALIVE;
-                    //sendPoint();
-                    //considerAction();
                     lastKey = KeyCode.K; 
                     
                 }
@@ -381,10 +363,9 @@ public class Snake extends Listener {
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
-                    //jezeli dostaniemy Point od węża niebieskiego 1 - niebieski
+                    //1 - blue, 2 - red, 3 - yellow, 4 - pinky winky
                     if (id == 1) {
                         board[x][y].setGraphic(new ImageView(player1));
-
                     }
                     if (id == 2) {
                         board[x][y].setGraphic(new ImageView(player2));
@@ -396,9 +377,7 @@ public class Snake extends Listener {
                         board[x][y].setGraphic(new ImageView(player4));
                     }
                     if (id == connectionID) {
-                        head.x = x;
-                        head.y = y;
-                      
+                        head.setLocation(new Point(x,y));               
                     }
                 }
             });
@@ -408,12 +387,10 @@ public class Snake extends Listener {
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
-                    //jezeli dostaniemy Point od węża niebieskiego 1 - niebieski
                     if (c1 >= 1) {
                         int x1 = ((PacketHead) o).x1;
                         int y1 = ((PacketHead) o).y1;
                         board[x1][y1].setGraphic(new ImageView(player1));
-                       // board[0][0].setGraphic(new ImageView(player2));
                     }
                     if (c1 >= 2) {
                         int x2 = ((PacketHead) o).x2;
@@ -436,7 +413,4 @@ public class Snake extends Listener {
 
     }
 
-    public List<Point> getList() {
-        return inne;
-    }
 }
