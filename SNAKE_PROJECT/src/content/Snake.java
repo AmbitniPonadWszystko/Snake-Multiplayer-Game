@@ -63,6 +63,7 @@ public class Snake extends Listener {
     private boolean ready;
     private boolean start;
     
+    private boolean canMove = true;
     private KeyCode temKey;
 
 
@@ -81,7 +82,7 @@ public class Snake extends Listener {
         try {
             Log.info("Please Enter the IP");
             // 1 timeout, 2 - IP, 3 - PORT
-            client.connect(500000000, "localhost", 7474, 7474);
+            client.connect(500000000, "192.168.0.11", 7474, 7474);
         } catch (Exception ex) {
             ex.printStackTrace();
             client.stop();
@@ -110,7 +111,11 @@ public class Snake extends Listener {
             p.x = head.x + actualTranslation.x;
             p.y = head.y + actualTranslation.y;
             p.id = connectionID;
-            client.sendTCP(p);
+            if(canMove == true)
+            {
+                client.sendTCP(p);
+                canMove = false;
+            }
 
         }
         else
@@ -268,6 +273,7 @@ public class Snake extends Listener {
         }
 
         if (o instanceof Packet.PacketDead) {
+            canMove = true;
             lifeStatus = LifeStatus.DEAD;
         }
         if (o instanceof Packet.PacketStart) {
@@ -377,6 +383,7 @@ public class Snake extends Listener {
                         board[x][y].setGraphic(new ImageView(player4));
                     }
                     if (id == connectionID) {
+                        canMove = true;
                         head.setLocation(new Point(x,y));               
                     }
                 }

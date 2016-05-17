@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<jnlp spec="1.0" xmlns:jfx="http://javafx.com" href="SNAKE_PROJECT.jnlp">
+  <information>
+    <title>SNAKE_PROJECT</title>
+    <vendor>Mateusz</vendor>
+    <description>null</description>
+    <offline-allowed/>
+  </information>
+  <resources>
+    <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se"/>
+    <jar href="SNAKE_PROJECT.jar" size="27274" download="eager" />
+    <jar href="lib\kryonet-1.04-all.jar" size="185888" download="eager" />
+  </resources>
+  <applet-desc  width="800" height="600" main-class="com.javafx.main.NoJavaFXFallback"  name="SNAKE_PROJECT" >
+    <param name="requiredFXVersion" value="8.0+"/>
+  </applet-desc>
+  <jfx:javafx-desc  width="800" height="600" main-class="content.GraphicalInterface"  name="SNAKE_PROJECT" />
+  <update check="always"/>
+</jnlp>
