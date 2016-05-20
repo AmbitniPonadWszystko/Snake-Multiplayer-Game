@@ -12,7 +12,9 @@ import com.esotericsoftware.kryonet.Connection;
  * @author Mateusz
  */
 public class Player {
-    public int x,y;
+
+    public int x, y;
     public Connection c;
     int id;
+    boolean isAlive;
 }

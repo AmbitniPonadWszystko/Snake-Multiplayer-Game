@@ -1,144 +1,138 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package serverprime;
 
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.minlog.Log;
-import java.awt.Point;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.Semaphore;
 import serverprime.Packet.*;
 
-/**
- *
- * @author Mateusz
- */
-//That will be pulling for any conections etc
+//That will be polling for any conections etc
 public class NetworkListener extends Listener {
 
-    int conectionCounter = 0;
-    private static final Semaphore sem = new Semaphore(1);
-    List<Player> listA = new ArrayList<Player>();
-    PacketHead odp1 = new PacketHead();
-    int deadPlayets = 0;
-    int tour = 1;
-    int readyPlayers = 0;
-    private final static int sizeWidth = 120;
-    private final static int sizeHeight = 60;
+    //Some public flags
+    public int readyForNextPoints = 0;     // Used to check if snake can be moved
+    public int connectionCounter = 0;       // Number of connetced players
+    public int deadPlayers = 0;            // Number of dead players
+    public int tour = 1;                   // Number of tour
+    public int readyPlayers = 0;           // Used to check number of ready players ( beggining of the next tour )
+
+    private List<Player> listOfPlayers = new ArrayList<Player>(); // List of Players, helps with EVERYTHINGGGG <3
+    private PacketHead heads = new PacketHead(); //Private packet that is sent only on the beginning of each tour
+
+    private final static int sizeWidth = 120; // Width of our mask borad
+    private final static int sizeHeight = 60; // Height of our mask borad
     private int tabDeadPlayer[] = new int[4];
     private int playersScore[] = new int[4];
 
-    public void connected(Connection cnctn) {
-        conectionCounter++;
+    @Override
+    public void connected(Connection c) {
+        connectionCounter++; // Someone has connected
         Player player = new Player();
-
-        if (conectionCounter < 5) {
-            if (conectionCounter == 1) {
-
-                player.x = 9;
-                player.y = 9;
-                odp1.x1 = player.x;
-                odp1.y1 = player.y;
-                odp1.count = 1;
-                player.c = cnctn;
-                player.id = cnctn.getID();
-
-            } else if (conectionCounter == 2) {
-
-                player.x = 20;
-                player.y = 20;
-                odp1.x2 = player.x;
-                odp1.y2 = player.y;
-                odp1.count = 2;
-                player.c = cnctn;
-                player.id = cnctn.getID();
-            } else if (conectionCounter == 3) {
-                player.x = 2;
-                player.y = 17;
-                odp1.count = 3;
-                odp1.x3 = player.x;
-                odp1.y3 = player.y;
-                player.c = cnctn;
-                player.id = cnctn.getID();
-            } else {
-                player.x = 13;
-                player.y = 20;
-                odp1.x4 = player.x;
-                odp1.y4 = player.y;
-                odp1.count = 4;
-                player.c = cnctn;
-                player.id = cnctn.getID();
-
+        // more than 4 players are not allowed
+        if (connectionCounter < 5) {
+            //set players x,y and updating PacketHead
+            switch (connectionCounter) {
+                case 1:
+                    player.x = 60;
+                    player.y = 9;
+                    heads.x1 = player.x;
+                    heads.y1 = player.y;
+                    break;
+                case 2:
+                    player.x = 60;
+                    player.y = 51;
+                    heads.x2 = player.x;
+                    heads.y2 = player.y;
+                    break;
+                case 3:
+                    player.x = 4;
+                    player.y = 30;
+                    heads.x3 = player.x;
+                    heads.y3 = player.y;
+                    break;
+                case 4:
+                    player.x = 115;
+                    player.y = 30;
+                    heads.x4 = player.x;
+                    heads.y4 = player.y;
+                    break;
+                default:
+                    break;
             }
+            heads.count = connectionCounter; //helps in setting up heads       
+            player.c = c;
+            player.id = c.getID();
+            player.isAlive = true;
+            listOfPlayers.add(player); //adding next snake to list
 
-            ServerPrime.server.sendToAllTCP(odp1);
-            //ServerPrime.mask[player.x][player.y] = BarrierType.BLUE_SNAKE;
-            System.out.println(player.id);
+            ServerPrime.server.sendToAllTCP(heads); //send to ALL connected players packet with heads using TCP protocol
+
+            //ZMIENIC NAZWE NA PacketSetImage
             PacketAddPlayer p = new PacketAddPlayer();
             p.x = player.x;
             p.y = player.y;
             p.id = player.id;
-            //ServerPrime.server.sendToAllTCP(p);
-            cnctn.sendTCP(p);
-            //cnctn.sendTCP(p);
+            c.sendTCP(p);
+
             Log.info("[SERVER] Someone has connected.");
 
         } else {
             Log.info("[SERVER] Too much!");
         }
-
     }
 
+    @Override
     public void disconnected(Connection cnctn) {
+        connectionCounter--;
         Log.info("[SERVER] Someone has disconnected.");
     }
 
     public void newTour(Connection c) {
         if (tour <= 5) {
+            //Resurrect all snakes !!
+            for (Player pl : listOfPlayers) {
+                pl.isAlive = true;
+
+            }
             Log.info("New Tour");
             tour += 1;
             for (int i = 0; i < 4; i++) {
                 playersScore[i] += tabDeadPlayer[i];
             }
             Random generator = new Random();
-            PacketNewTour odp = new PacketNewTour();
-            odp.x1 = generator.nextInt(sizeWidth - 2) + 1;
-            odp.y1 = generator.nextInt(sizeHeight - 2) + 1;
-            odp.x2 = generator.nextInt(sizeWidth - 2) + 1;
-            odp.y2 = generator.nextInt(sizeHeight - 2) + 1;
-            odp.x3 = generator.nextInt(sizeWidth - 2) + 1;
-            odp.y3 = generator.nextInt(sizeHeight - 2) + 1;
-            odp.x4 = generator.nextInt(sizeWidth - 2) + 1;
-            odp.y4 = generator.nextInt(sizeHeight - 2) + 1;
-            odp.score1 = playersScore[0];
-            odp.score2 = playersScore[1];
-            odp.score3 = playersScore[2];
-            odp.score4 = playersScore[3];
-            odp.count = conectionCounter;
-            odp.tour = tour;
+            PacketNewTour newTour = new PacketNewTour();
+            newTour.x1 = generator.nextInt(sizeWidth - 2) + 1;
+            newTour.y1 = generator.nextInt(sizeHeight - 2) + 1;
+            newTour.x2 = generator.nextInt(sizeWidth - 2) + 1;
+            newTour.y2 = generator.nextInt(sizeHeight - 2) + 1;
+            newTour.x3 = generator.nextInt(sizeWidth - 2) + 1;
+            newTour.y3 = generator.nextInt(sizeHeight - 2) + 1;
+            newTour.x4 = generator.nextInt(sizeWidth - 2) + 1;
+            newTour.y4 = generator.nextInt(sizeHeight - 2) + 1;
+            newTour.score1 = playersScore[0];
+            newTour.score2 = playersScore[1];
+            newTour.score3 = playersScore[2];
+            newTour.score4 = playersScore[3];
+            newTour.count = connectionCounter;
+            newTour.tour = tour;
             ServerPrime.initBoard();
 
-            ServerPrime.server.sendToAllTCP(odp);
+            ServerPrime.server.sendToAllTCP(newTour);
             readyPlayers = 0;
-            deadPlayets = 0;
+            deadPlayers = 0;
         } else {
             System.out.println("END");
         }
 
     }
 
+    @Override
     public void received(Connection c, Object o) {
         if (o instanceof PacketReadyPlayer) {
             readyPlayers += 1;
-            if (readyPlayers == conectionCounter) {
+            if (readyPlayers == connectionCounter) {
                 PacketStart odp = new PacketStart();
                 ServerPrime.server.sendToAllTCP(odp);
 
@@ -147,47 +141,73 @@ public class NetworkListener extends Listener {
         }
         if (o instanceof PacketLoginRequested) {
             PacketLoginAccepted loginAnswer = new PacketLoginAccepted();
-            if (conectionCounter < 5) {
+            if (connectionCounter < 5) {
                 loginAnswer.accepted = true;
             } else {
                 loginAnswer.accepted = false;
             }
             c.sendUDP(loginAnswer);
         }
-        if (o instanceof PacketMessage) {
-            String message = ((PacketMessage) o).message;
-            Log.info(ServerPrime.connections.toString());
-            Log.info(message);
-        }
+
+        //PacketPoint handle. Used to check collision
         if (o instanceof PacketPoint) {
-            sem.acquireUninterruptibly();
+            //getting x,y from packet
             int x = ((PacketPoint) o).x;
             int y = ((PacketPoint) o).y;
-            Log.info("Odebrano nowy point" + x + " " + y);
-            //jezeli pkt jest ok
-            if (ServerPrime.mask[x][y] == BarrierType.EMPTY) {
 
-                ServerPrime.mask[x][y] = BarrierType.BLUE_SNAKE;
-                PacketPoint p = new PacketPoint();
-                p.x = x;
-                p.y = y;
-                p.id = c.getID();
-                ServerPrime.server.sendToAllTCP(p);
+            //checking collisiom
+            if (ServerPrime.mask[x][y] == BarrierType.EMPTY) {
+                ServerPrime.mask[x][y] = BarrierType.SNAKE; //updating mask woth new point
+
+                //Updating head with new points
+                listOfPlayers.get(c.getID() - 1).x = x;
+                listOfPlayers.get(c.getID() - 1).y = y;
+                readyForNextPoints++; //snake is ready for sending points
+
+                //If for example 4 snakes are ready for sending points, then
+                //points will be send to all of them using TCP
+                if (readyForNextPoints == connectionCounter - deadPlayers) {
+                    for (Player pl : listOfPlayers) {
+                        if (pl.isAlive) {
+                            readyForNextPoints = 0;
+                            PacketPoint p = new PacketPoint();
+                            p.x = pl.x;
+                            p.y = pl.y;
+                            p.id = pl.id;
+                            ServerPrime.server.sendToAllTCP(p);
+
+                        }
+                    }
+                }
 
             } else {
-                Log.info("Umieeram");
-                PacketDead odp = new PacketDead();
-                tabDeadPlayer[((PacketPoint) o).id - 1] = deadPlayets + 1;
-                deadPlayets += 1;
-                if (deadPlayets == conectionCounter) {
-                    newTour(c);
+                //Snake which connection in c.getID() is dead.
+                listOfPlayers.get(c.getID() - 1).isAlive = false;
+                // Moving the rest of snakes
+                for (Player pl : listOfPlayers) {
+                    if (pl.isAlive) {
+                        readyForNextPoints = 0;
+                        PacketPoint p = new PacketPoint();
+                        p.x = pl.x;
+                        p.y = pl.y;
+                        p.id = pl.id;
+                        ServerPrime.server.sendToAllTCP(p);
+
+                    }
                 }
-                c.sendUDP(odp);
-                //ServerPrime.server.sendToUDP(c.getID(), odp);
-                //ServerPrime.initBoard();
+
+                tabDeadPlayer[((PacketPoint) o).id - 1] = deadPlayers + 1;
+                deadPlayers += 1;
+                if (deadPlayers == connectionCounter) {
+                    newTour(c);
+                   // deadPlayers = connectionCounter;
+                }
+
+                //packet which informs snake that it is dead
+                PacketDead dead = new PacketDead();
+                c.sendTCP(dead);
 
             }
-            sem.release();
 
         }
     }
