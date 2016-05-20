@@ -156,9 +156,13 @@ public class GraphicalInterface extends Application {
         Snake snake = new Snake(this);
 
         //EVENT FOR KEYBOARD
-        EventHandler<KeyEvent> keyEventEventHandler = event -> {
-            snake.setLastKey(event.getCode());    //call snake method, to filter the input and choose further direction
-            //event.consume();                 //don't allow to propagete event value further(next calls)
+        EventHandler<KeyEvent> keyEventEventHandler;
+        keyEventEventHandler = new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                snake.setLastKey(event.getCode());    //call snake method, to filter the input and choose further direction
+                //event.consume();                 //don't allow to propagete event value further(next calls)
+            }
         };
 
         //add event handler constructed right above this line to WHOLE WINDOW(mainScene)^

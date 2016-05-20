@@ -82,7 +82,7 @@ public class Snake extends Listener {
         try {
             Log.info("Please Enter the IP");
             // 1 timeout, 2 - IP, 3 - PORT
-            client.connect(500000000, "192.168.0.11", 7474, 7474);
+            client.connect(500000000, "localhost", 7474, 7474);
         } catch (Exception ex) {
             ex.printStackTrace();
             client.stop();
