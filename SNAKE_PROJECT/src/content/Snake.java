@@ -8,7 +8,6 @@ import com.esotericsoftware.minlog.Log;
 
 import javafx.scene.input.KeyCode;
 import java.awt.Point;
-import java.io.IOException;
 import javafx.scene.image.Image;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -22,7 +21,12 @@ import javafx.application.Platform;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import static content.GraphicalInterface.*;
-import javafx.geometry.Insets;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javafx.concurrent.Task;
 
 /**
  * Created by Michał Martyniak and company :P on 19.03.2016.
@@ -36,6 +40,7 @@ public class Snake extends Listener {
     public static Label[][] board = new Label[sizeWidth][sizeHeight];
     public static Label[] scores = new Label[4];
     public static Label tour;
+    public static Label second;
     public static BarrierType[][] mask = new BarrierType[sizeWidth][sizeHeight];
     static Map<Integer, MPPlayer> players = new HashMap<Integer, MPPlayer>();
 
@@ -51,26 +56,22 @@ public class Snake extends Listener {
     public static Client client;
     public static Scanner scanner;
     private Point actualTranslation;
-    private List<Point> inne = new ArrayList<>();
 
     private Image player1;
     private Image player2;
     private Image player3;
     private Image player4;
     private Image bg;
+   
+    private boolean ready;                      //player is ready to play
+    private static boolean start;               //all players are ready to play
     
-    private GraphicalInterface gui;
-    private boolean ready;
-    private boolean start;
-    
-    private boolean canMove = true;
+    private boolean canMove = true;             //false == sent Point to server and waiting
     private KeyCode temKey;
-
-
-    public Snake(GraphicalInterface graphicalInterface) {
+  
+    public Snake() {
         ready=false;
         start=false;
-        gui=graphicalInterface;
         scanner = new Scanner(System.in);
         actualTranslation = new Point(0, 0);
         client = new Client();
@@ -94,6 +95,7 @@ public class Snake extends Listener {
         lifeStatus = LifeStatus.ALIVE;            //snake is alive
         int[] temp=new int[4];
         initScoreAndTour(temp, 1);
+        
     }
 
     public void initImages() {
@@ -105,7 +107,9 @@ public class Snake extends Listener {
         
     }
 
+    //sending coordinates to server
     public void sendPoint() {
+        
         if(lifeStatus==LifeStatus.ALIVE && start==true){
             PacketPoint p = new PacketPoint();
             p.x = head.x + actualTranslation.x;
@@ -116,10 +120,7 @@ public class Snake extends Listener {
                 client.sendTCP(p);
                 canMove = false;
             }
-
         }
-        else
-            System.out.println("Waiting...");
     }
 
 
@@ -175,6 +176,7 @@ public class Snake extends Listener {
         return head;
     }
 
+
     public Image getImage() {
         return image;
     }
@@ -197,13 +199,14 @@ public class Snake extends Listener {
     public void setLife(LifeStatus value) {
         lifeStatus = value;
     }
-
-
-
+    
     public void setLastKey(KeyCode key) {
         lastKey = key;
     }
-
+    public static void setStarted(boolean value){
+        start=value;
+        
+    }
     private void register() {
         //Some type of Serializer which encodes info to readable thing
         // something that can be send over network
@@ -231,29 +234,51 @@ public class Snake extends Listener {
     public void disconnected(Connection cnctn) {
         Log.info("[CLIENT] You have disconnected.");
     }
-    private void setter(Label label, int position){
-        infoGridPane.setConstraints(label,0,0);
-        infoGridPane.setMargin(label,new Insets(0,0,0,position));
-        infoGridPane.getChildren().add(label);
+    private void setter(Label label, int positionY, int positionX){
+        //infoGridPane.setConstraints(label,0,0);
+        //infoGridPane.setMargin(label,new Insets(0,0,0,position));
+        label.setLayoutX(positionX);
+        label.setLayoutY(positionY);
+        pane.getChildren().add(label);
     
     }
     public void removeScoreAndTour(){
         for (int i = 0; i < 4; i++) {
-            infoGridPane.getChildren().remove(scores[i]);
+            pane.getChildren().remove(scores[i]);
         }
-        infoGridPane.getChildren().remove(tour);
+        pane.getChildren().remove(tour);
     }
     public void initScoreAndTour(int[] sc, int t){
+        second=new Label();//                
+        second.setLayoutX(500);
+        second.setLayoutY(200);
+        pane.getChildren().add(second);
         for(int i=0; i<4; i++){
             scores[i] = new Label((new Integer(sc[i])).toString());
-            setter(scores[i],220+i*265);          
+            
+            setter(scores[i],30,i*265+120);          
         } 
         tour = new Label("tura: "+ (new Integer(t)).toString());
-        setter(tour,1100);
+        setter(tour,33, 1110);
     
     
     }
+  
+    //show 3, 2, 1 when all players are ready
+    public void beReady(){
+        
+        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+        
+        //task in order, waiting for the end of the previous
+        executor.schedule(new loadNumber(3), 2, TimeUnit.SECONDS);
+        executor.schedule(new loadNumber(2), 2, TimeUnit.SECONDS);
+        executor.schedule(new loadNumber(1), 2, TimeUnit.SECONDS);
+        executor.schedule(new loadNumber(0), 2, TimeUnit.SECONDS);
 
+        executor.shutdown();
+     
+    }
+    //reaction to Package from server
     public void received(Connection c, Object o) {
         if (o instanceof Packet.PacketLoginAccepted) {
             boolean answer = ((Packet.PacketLoginAccepted) o).accepted;
@@ -265,7 +290,6 @@ public class Snake extends Listener {
                 Log.info("Too many players");
                 System.exit(0);
             }
-
         }
         if (o instanceof Packet.PacketMessage) {
             String message = ((Packet.PacketMessage) o).message;
@@ -277,9 +301,8 @@ public class Snake extends Listener {
             lifeStatus = LifeStatus.DEAD;
         }
         if (o instanceof Packet.PacketStart) {
-            start=true;
-            sendPoint();
-            Log.info("startuje");
+            beReady();            
+            Log.info("start");
         }
         if (o instanceof Packet.PacketAddPlayer) {
             PacketAddPlayer packet = (PacketAddPlayer) o;
@@ -316,7 +339,7 @@ public class Snake extends Listener {
                     initScoreAndTour(sc, ((PacketNewTour) o).tour);
                     ready=false;
                     start=false;
-
+                    //setting snake's head
                     switch (connectionID) {
                         case 1:
                             head.x=((PacketNewTour) o).x1;
@@ -338,12 +361,13 @@ public class Snake extends Listener {
                             break;
                     }
                
-                    
+                    //new board
                     for (int x = 1; x < sizeWidth-1; x++) {
                         for (int y = 1; y < sizeHeight-1; y++) {
                                 board[x][y].setGraphic(new ImageView(bg));
                         }
                     }
+                    //locate snake's heads on board
                     board[((PacketNewTour) o).x1][((PacketNewTour) o).y1].setGraphic(new ImageView(player1));
                     if(((PacketNewTour) o).count>1)
                         board[((PacketNewTour) o).x2][((PacketNewTour) o).y2].setGraphic(new ImageView(player2));
@@ -352,8 +376,7 @@ public class Snake extends Listener {
                     if(((PacketNewTour) o).count>3)
                         board[((PacketNewTour) o).x4][((PacketNewTour) o).y4].setGraphic(new ImageView(player4));
                     lifeStatus=LifeStatus.ALIVE;
-                    lastKey = KeyCode.K; 
-                    
+                    lastKey = KeyCode.K;                     
                 }
             });
         }
