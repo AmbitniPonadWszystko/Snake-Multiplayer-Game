@@ -37,6 +37,8 @@ import static content.Snake.scores;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
+import javafx.scene.Group;
+import javafx.scene.layout.Pane;
 
 public class GraphicalInterface extends Application {
 
@@ -47,10 +49,10 @@ public class GraphicalInterface extends Application {
     private Scene mainScene;                //scene that holds whole content
 
     //layouts
-    private BorderPane borderPane;          //holds boardGridPane and infoGridPane within
-    private GridPane boardGridPane;         //layout to store our labels(board)
-    public static GridPane infoGridPane;              //layout for info bar at the top of the window
-
+    //private Pane borderPane;          //holds boardGridPane and infoGridPane within
+    public static Pane pane;         //layout to store our labels(board)
+    //public static Pane infoGridPane;              //layout for info bar at the top of the window
+    
     //Important for FPS calculations
     private long previousFrameTime;         //time in nanosecond of the latest frame
 
@@ -87,13 +89,17 @@ public class GraphicalInterface extends Application {
 
                 if (!refreshOnly) {///important(if snake dies, we dont need to reallocate memory for labels
                     board[x][y] = new Label();
+                    board[x][y].setLayoutX(10*x);
+                    board[x][y].setLayoutY(10*y+80);
                     board[x][y].setMaxSize(0.5, 0.5);
+                    pane.getChildren().add(board[x][y]);
                 }
-                GridPane.setConstraints(board[x][y], x, y);       //bind board tile to proper COLUMN and ROW in our grid
-                boardGridPane.getChildren().add(board[x][y]);   //finally add each of them
+                //GridPane.setConstraints(board[x][y], x, y);       //bind board tile to proper COLUMN and ROW in our grid
+                  //finally add each of them
             }
         }
-
+        
+        
     }
 
 
@@ -126,20 +132,23 @@ public class GraphicalInterface extends Application {
         initImages();                   //call Images initialization for further use
 
         //TOP
-        infoGridPane = new GridPane();
-        infoGridPane.setMinHeight(infoBarHeight);
-        infoGridPane.getChildren().add(new ImageView(infoBarBg));
+        pane = new Pane();
+        pane.setMinHeight(infoBarHeight);
+        pane.getChildren().add(new ImageView(infoBarBg));
 
         //CENTER
-        boardGridPane = new GridPane();
+        //boardGridPane = new Pane();
         //boardGridPane.setPadding(new Insets(0, 0, 0, 0));    //0 pixel padding on each side
-        boardGridPane.setVgap(-10);                         //vertical spacing between each label
-        boardGridPane.setHgap(-10);                         //horizontal spacing
+        //boardGridPane.setVgap(-10);                         //vertical spacing between each label
+        //boardGridPane.setHgap(-10);                         //horizontal spacing
 
+        
+    
         //MAIN LAYOUT
-        borderPane = new BorderPane();
-        borderPane.setCenter(boardGridPane);              //board layout is in the center of main layout
-        borderPane.setTop(infoGridPane);
+        //borderPane = new Pane();
+        
+        //borderPane.boardGridPane);              //board layout is in the center of main layout
+        //borderPane.setTop(infoGridPane);
 
         initBoard(false);               //call board initialization method
         initMap();
@@ -152,20 +161,21 @@ public class GraphicalInterface extends Application {
 
         window = primaryStage;              //must-have assignment
         window.setTitle(windowName);        //window TITLE
-        mainScene = new Scene(borderPane, windowWidth, windowHeight);//10 left padding, 40*20 tiles space, 10 right padding
-        Snake snake = new Snake(this);
-
+        mainScene = new Scene(pane, windowWidth, windowHeight);//10 left padding, 40*20 tiles space, 10 right padding
+        Snake snake = new Snake();
+        
         //EVENT FOR KEYBOARD
         EventHandler<KeyEvent> keyEventEventHandler;
         keyEventEventHandler = new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent event) {
                 snake.setLastKey(event.getCode());    //call snake method, to filter the input and choose further direction
-                //event.consume();                 //don't allow to propagete event value further(next calls)
+                
             }
         };
 
         //add event handler constructed right above this line to WHOLE WINDOW(mainScene)^
+
         mainScene.addEventHandler(KeyEvent.KEY_PRESSED, keyEventEventHandler);
         window.setScene(mainScene);
         window.show();                      //display mainScene on the window
