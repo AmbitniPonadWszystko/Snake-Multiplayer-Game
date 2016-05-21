@@ -18,8 +18,8 @@ public class NetworkListener extends Listener {
     public int tour = 1;                   // Number of tour
     public int readyPlayers = 0;           // Used to check number of ready players ( beggining of the next tour )
 
-    private List<Player> listOfPlayers = new ArrayList<Player>(); // List of Players, helps with EVERYTHINGGGG <3
-    private PacketHead heads = new PacketHead(); //Private packet that is sent only on the beginning of each tour
+    private final List<Player> listOfPlayers = new ArrayList<>(); // List of Players, helps with EVERYTHINGGGG <3
+    private final PacketHead heads = new PacketHead(); //Private packet that is sent only on the beginning of each tour
 
     private final static int sizeWidth = 120; // Width of our mask borad
     private final static int sizeHeight = 60; // Height of our mask borad

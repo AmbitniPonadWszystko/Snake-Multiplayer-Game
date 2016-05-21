@@ -1,43 +1,16 @@
 package content;
 
-import com.esotericsoftware.minlog.Log;
-import com.sun.javafx.geom.Rectangle;
-//import content.network.ClientPrime;
 import javafx.application.Application;
-
-import javafx.application.Platform;
-import javafx.event.Event;
 import javafx.event.EventHandler;
-import javafx.geometry.Insets;
-
 import javafx.animation.AnimationTimer;
-
-import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
-
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
-import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseButton;
-import javafx.scene.layout.GridPane;
-
-import java.awt.Point;
 import content.Enums.*;
 import static content.Snake.board;
-import static content.Snake.mask;
-import static content.Snake.scores;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Semaphore;
-import javafx.scene.Group;
 import javafx.scene.layout.Pane;
 
 public class GraphicalInterface extends Application {
@@ -63,22 +36,20 @@ public class GraphicalInterface extends Application {
     private Image infoBarBg;                //template from paint
     private final static int sizeWidth = 120;          //Width of our Label board
     private final static int sizeHeight = 60;         //Height our Label board
-    //layout elements(childrens)
 
-    //mask containing position of snakes, walls, etc
-    public static Label[] names = new Label[4];
-    //public static Label[] scores = new Label[4];
-    
+
     //-----------------------------
     //static
     private final static int infoBarHeight = 80;      //constant variable which determines InfoBar Height
 
-    private static String windowName = "SNAKE - alpha compilation test";
+    private static String windowName = "Snake Multiplayer Game";
     private static int windowWidth = sizeWidth * 10;
     private static int windowHeight = (sizeHeight * 10) + infoBarHeight; //how many round have to be done until the game ends
 
     private static int fps = 4;             //how many frames/moves are in one second
 
+    //mask containing position of snakes, walls, etc
+    public static Label[] names = new Label[4];    
     //----------------------------
     //methods
     /*  initializing just our board             */
@@ -94,8 +65,6 @@ public class GraphicalInterface extends Application {
                     board[x][y].setMaxSize(0.5, 0.5);
                     pane.getChildren().add(board[x][y]);
                 }
-                //GridPane.setConstraints(board[x][y], x, y);       //bind board tile to proper COLUMN and ROW in our grid
-                  //finally add each of them
             }
         }
         
@@ -128,28 +97,12 @@ public class GraphicalInterface extends Application {
 
     @Override                                //override javaFX native method
     public void init() {   
-        //moved here because Hbox requires InfoBg to be initialized
         initImages();                   //call Images initialization for further use
 
         //TOP
         pane = new Pane();
         pane.setMinHeight(infoBarHeight);
         pane.getChildren().add(new ImageView(infoBarBg));
-
-        //CENTER
-        //boardGridPane = new Pane();
-        //boardGridPane.setPadding(new Insets(0, 0, 0, 0));    //0 pixel padding on each side
-        //boardGridPane.setVgap(-10);                         //vertical spacing between each label
-        //boardGridPane.setHgap(-10);                         //horizontal spacing
-
-        
-    
-        //MAIN LAYOUT
-        //borderPane = new Pane();
-        
-        //borderPane.boardGridPane);              //board layout is in the center of main layout
-        //borderPane.setTop(infoGridPane);
-
         initBoard(false);               //call board initialization method
         initMap();
         
