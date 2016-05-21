@@ -132,7 +132,6 @@ public class GraphicalInterface extends Application {
 
         mainScene.addEventHandler(KeyEvent.KEY_PRESSED, keyEventEventHandler);
         window.setScene(mainScene);
-        window.resizableProperty().setValue(Boolean.FALSE); // disabled maximize button
         window.show();                      //display mainScene on the window
 
         /* GAME LOOP. we must mull this over, how we'll handle everything in here*/
