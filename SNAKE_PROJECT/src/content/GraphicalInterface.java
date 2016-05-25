@@ -12,6 +12,7 @@ import javafx.scene.image.ImageView;
 import content.Enums.*;
 import static content.Snake.board;
 import javafx.scene.layout.Pane;
+
 import javafx.stage.StageStyle;
 
 public class GraphicalInterface extends Application {
@@ -43,6 +44,7 @@ public class GraphicalInterface extends Application {
     //static
     private final static int infoBarHeight = 80;      //constant variable which determines InfoBar Height
 
+    static LoginWindow loginWindow;
     private static String windowName = "Snake Multiplayer Game";
     private static int windowWidth = sizeWidth * 10;
     private static int windowHeight = (sizeHeight * 10) + infoBarHeight; //how many round have to be done until the game ends
@@ -112,7 +114,7 @@ public class GraphicalInterface extends Application {
     //IT IS TECHNICALLY OUR MAIN //(learned from documentation)
     @Override                               //override javaFX native method
     public void start(Stage primaryStage) throws Exception {
-        LoginWindow loginWindow = new LoginWindow(primaryStage);
+        loginWindow = new LoginWindow(primaryStage);
         LoginWindow.GameConfiguration config = loginWindow.getConfiguration();
 
         window = primaryStage;              //must-have assignment

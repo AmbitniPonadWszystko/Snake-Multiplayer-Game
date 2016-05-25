@@ -22,6 +22,8 @@ public class LoginWindow {
     
     //private Image image;
     private Stage primaryStage;
+    private TextField ipAdress;
+    private TextField playerName;
     
     public LoginWindow(Stage primaryStage) {
         this.primaryStage = primaryStage;
@@ -37,15 +39,14 @@ public class LoginWindow {
         //image = new Image(getClass().getResourceAsStream("resources/bg.png"));
         String image = LoginWindow.class.getResource("resources/bg.png").toExternalForm();
         dialog.getDialogPane().setStyle("-fx-background-image: url('" + image + "'); " +
-           "-fx-background-position: center center; " +
            "-fx-background-repeat: repeat;");
         
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
         
-        TextField playerName = new TextField();
-        TextField ipAdress = new TextField();
+        playerName = new TextField();
+        ipAdress = new TextField();
         
         
         Label loginLabel = new Label("Login:");
@@ -103,10 +104,9 @@ public class LoginWindow {
 
         ChoiceDialog<String> colors = new ChoiceDialog<>("niebieski", choices);
         colors.getDialogPane().setStyle("-fx-background-image: url('" + image + "'); " +
-           "-fx-background-position: center center; " +
            "-fx-background-repeat: repeat;");
         colors.setTitle("Teraz wybierz kolor:");
-        colors.setHeaderText("Wybierz kolor z listy");
+        colors.setHeaderText(null);
         
         
         colors.setOnCloseRequest((DialogEvent e) -> {
@@ -131,6 +131,15 @@ public class LoginWindow {
         
         return true;
     }
+    
+    public String getIpAdress(){
+        return ipAdress.getText();
+    }
+
+    public String getPlayerName(){
+        return playerName.getText();
+    }
+    
     
     class GameConfiguration {
         public String playerName;

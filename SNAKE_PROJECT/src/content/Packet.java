@@ -8,7 +8,9 @@ package content;
 import java.awt.Point;
 
 public class Packet {
-    public static class PacketLoginRequested{}
+    public static class PacketLoginRequested {
+        String name;
+    }
     public static class PacketLoginAccepted {boolean accepted = true;}
     // Client -> Server message
     public static class PacketMessage{ 
@@ -41,4 +43,13 @@ public class Packet {
     }
     public static class PacketReadyPlayer{}
     public static class PacketStart{}
+    
+        public static class PacketNames {
+
+        String name1;
+        String name2;
+        String name3;
+        String name4;
+        
+    }
 }

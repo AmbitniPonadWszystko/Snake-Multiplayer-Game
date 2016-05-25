@@ -24,6 +24,7 @@ public class NetworkListener extends Listener {
     private final static int sizeWidth = 120; // Width of our mask borad
     private final static int sizeHeight = 60; // Height of our mask borad
     private int tabDeadPlayer[] = new int[4];
+    private String playersNames[] = new String[4];
     private int playersScore[] = new int[4];
 
     @Override
@@ -142,11 +143,22 @@ public class NetworkListener extends Listener {
         if (o instanceof PacketLoginRequested) {
             PacketLoginAccepted loginAnswer = new PacketLoginAccepted();
             if (connectionCounter < 5) {
+                String name = ((PacketLoginRequested) o).name;
+                playersNames[c.getID() - 1] = name;
                 loginAnswer.accepted = true;
             } else {
                 loginAnswer.accepted = false;
             }
+
             c.sendUDP(loginAnswer);
+
+            PacketNames pNames = new PacketNames();
+            pNames.name1 = playersNames[0];
+            pNames.name2 = playersNames[1];
+            pNames.name3 = playersNames[2];
+            pNames.name4 = playersNames[3];
+            ServerPrime.server.sendToAllTCP(pNames);
+
         }
 
         //PacketPoint handle. Used to check collision
@@ -200,7 +212,7 @@ public class NetworkListener extends Listener {
                 deadPlayers += 1;
                 if (deadPlayers == connectionCounter) {
                     newTour(c);
-                   // deadPlayers = connectionCounter;
+                    // deadPlayers = connectionCounter;
                 }
 
                 //packet which informs snake that it is dead

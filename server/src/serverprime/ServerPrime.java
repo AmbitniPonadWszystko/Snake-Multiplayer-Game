@@ -54,12 +54,14 @@ public class ServerPrime {
         kryo.register(Packet.PacketPoint.class);
         kryo.register(Packet.PacketPointAccepted.class);
         kryo.register(Packet.PacketPointRefused.class);
+        kryo.register(Packet.PacketNames.class);
         kryo.register(Packet.PacketDead.class);
         kryo.register(Packet.PacketAddPlayer.class);
         kryo.register(Packet.PacketHead.class);
         kryo.register(Packet.PacketNewTour.class);
         kryo.register(Packet.PacketReadyPlayer.class);
         kryo.register(Packet.PacketStart.class);
+        
     }
 
     public static void main(String[] args) {

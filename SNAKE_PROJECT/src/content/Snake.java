@@ -21,6 +21,7 @@ import javafx.application.Platform;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import static content.GraphicalInterface.*;
+import static content.LoginWindow.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -47,6 +48,7 @@ public class Snake extends Listener {
     private Point head;             //coordinates of snake's head
     private KeyCode lastKey;        //direction variable, allow to continue snake's movement in that direction constantly
 
+    
     private Integer points;             //player's points
     private LifeStatus lifeStatus;  //to know more look a defined enum a few lines above this one ^
     private Image image;
@@ -62,7 +64,10 @@ public class Snake extends Listener {
     private Image player3;
     private Image player4;
     private Image bg;
-
+    
+    // Array with names of all players connected   playerNamer[connectionID] is this name;
+    private String playersNames[] = new String[4];
+ 
     private boolean ready;                      //player is ready to play
     private static boolean start;               //all players are ready to play
 
@@ -75,6 +80,7 @@ public class Snake extends Listener {
         scanner = new Scanner(System.in);
         actualTranslation = new Point(0, 0);
         client = new Client();
+        
 
         register();
         initImages();
@@ -83,7 +89,7 @@ public class Snake extends Listener {
         try {
             Log.info("Please Enter the IP");
             // 1 timeout, 2 - IP, 3 - PORT
-            client.connect(500000000, "192.168.0.14", 7474, 7474);
+            client.connect(500000000, loginWindow.getIpAdress() , 7474, 7474);
         } catch (Exception ex) {
             ex.printStackTrace();
             client.stop();
@@ -218,6 +224,7 @@ public class Snake extends Listener {
         kryo.register(Packet.PacketPoint.class);
         kryo.register(Packet.PacketPointAccepted.class);
         kryo.register(Packet.PacketPointRefused.class);
+        kryo.register(Packet.PacketNames.class);
         kryo.register(Packet.PacketDead.class);
         kryo.register(Packet.PacketAddPlayer.class);
         kryo.register(Packet.PacketHead.class);
@@ -227,8 +234,10 @@ public class Snake extends Listener {
     }
 
     public void connected(Connection cnctn) {
-        Log.info("[CLIENT] You have connected.");
-        client.sendTCP(new Packet.PacketLoginRequested());
+        Log.info("[CLIENT] You have connected! hello " + loginWindow.getPlayerName());
+        PacketLoginRequested p = new PacketLoginRequested();
+        p.name = loginWindow.getPlayerName();
+        client.sendTCP(p);
     }
 
     public void disconnected(Connection cnctn) {
@@ -323,6 +332,16 @@ public class Snake extends Listener {
                 image = player4;
             }
 
+        }
+        
+        if (o instanceof PacketNames) {
+            PacketNames packet = (PacketNames) o;
+            playersNames[0] = packet.name1;
+            playersNames[1] = packet.name2;
+            playersNames[2] = packet.name3;
+            playersNames[3] = packet.name4;
+            Log.info(playersNames[0] + " " + playersNames[1] + " " + playersNames[2] + " " + playersNames[3]);
+            
         }
 
         if (o instanceof PacketNewTour) {
