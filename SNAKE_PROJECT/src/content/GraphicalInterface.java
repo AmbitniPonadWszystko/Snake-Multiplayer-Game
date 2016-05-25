@@ -112,6 +112,8 @@ public class GraphicalInterface extends Application {
     //IT IS TECHNICALLY OUR MAIN //(learned from documentation)
     @Override                               //override javaFX native method
     public void start(Stage primaryStage) throws Exception {
+        LoginWindow loginWindow = new LoginWindow(primaryStage);
+        LoginWindow.GameConfiguration config = loginWindow.getConfiguration();
 
         window = primaryStage;              //must-have assignment
         window.setTitle(windowName);        //window TITLE
