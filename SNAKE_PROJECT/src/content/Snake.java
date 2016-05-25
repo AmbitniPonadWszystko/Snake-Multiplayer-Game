@@ -285,11 +285,11 @@ public class Snake extends Listener {
 
         for (int i = 0; i < 4; i++) {
             names[i] = new Label();
-            
+
         }
-       setter(names[0], 30, 72);
-       setter(names[1], 30, 337);
-       setter(names[2], 30, 605);
+        setter(names[0], 30, 72);
+        setter(names[1], 30, 337);
+        setter(names[2], 30, 603);
         setter(names[3], 30, 865);
     }
 
