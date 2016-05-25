@@ -237,6 +237,7 @@ public class Snake extends Listener {
         kryo.register(Packet.PacketNewTour.class);
         kryo.register(Packet.PacketReadyPlayer.class);
         kryo.register(Packet.PacketStart.class);
+        kryo.register(Packet.PacketEndGame.class);
     }
 
     public void connected(Connection cnctn) {
@@ -348,17 +349,12 @@ public class Snake extends Listener {
         dialog.getDialogPane().setContent(grid);
 
         dialog.showAndWait();
-        /*
+        
         if (dialog.getResult() == yesButtonType){
-
-
-
-        // MAAAAAAAAAAAAAAAAAAAAAAAATI, TU MOŻNA WYCZYŚCIĆ WSZYSTKO :D   
-
-
+           // CZY CHCEMY ZACZAC NOWA GRE
         }
         
-         */
+         
     }
 
     //reaction to Package from server
@@ -382,13 +378,6 @@ public class Snake extends Listener {
         if (o instanceof Packet.PacketDead) {
             canMove = true;
             lifeStatus = LifeStatus.DEAD;
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                    endGame();
-                }
-
-            });
         }
         if (o instanceof Packet.PacketStart) {
             beReady();
@@ -418,10 +407,10 @@ public class Snake extends Listener {
 
         if (o instanceof PacketNames) {
             PacketNames packet = (PacketNames) o;
-            playersNames[0] = packet.name1;
-            playersNames[1] = packet.name2;
-            playersNames[2] = packet.name3;
-            playersNames[3] = packet.name4;
+            playersNames[0] = packet.name2;
+            playersNames[1] = packet.name4;
+            playersNames[2] = packet.name1;
+            playersNames[3] = packet.name3;
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
@@ -493,6 +482,15 @@ public class Snake extends Listener {
                     lifeStatus = LifeStatus.ALIVE;
                     lastKey = KeyCode.K;
                 }
+            });
+        }
+        if (o instanceof Packet.PacketEndGame) {
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    endGame();
+                }
+
             });
         }
 

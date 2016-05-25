@@ -23,6 +23,7 @@ public class Packet {
 }
     public static class PacketPointAccepted{}
     public static class PacketPointRefused{}
+    public static class PacketEndGame {}
     public static class PacketDead{}
     public static class PacketAddPlayer{
         public int id,x,y;

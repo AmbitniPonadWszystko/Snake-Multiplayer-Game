@@ -26,12 +26,12 @@ public class NetworkListener extends Listener {
     private int tabDeadPlayer[] = new int[4];
     private String playersNames[] = new String[4];
     private int playersScore[] = new int[4];
-    private int[] rewards={0,1,2,3};
+    private int[] rewards = {0, 1, 2, 3};
     private int rewardPosition;
 
     @Override
     public void connected(Connection c) {
-        rewardPosition=0;
+        rewardPosition = 0;
         connectionCounter++; // Someone has connected
         Player player = new Player();
         // more than 4 players are not allowed
@@ -43,7 +43,7 @@ public class NetworkListener extends Listener {
                     player.y = 9;
                     heads.x1 = player.x;
                     heads.y1 = player.y;
-                    
+
                     break;
                 case 2:
                     player.x = 60;
@@ -93,14 +93,10 @@ public class NetworkListener extends Listener {
         connectionCounter--;
         Log.info("[SERVER] Someone has disconnected.");
     }
-       private void endGame(){
-        
-    
-    
-    
-    
-    
-    
+
+    private void endGame() {
+        PacketEndGame endGame = new PacketEndGame();
+        ServerPrime.server.sendToAllTCP(endGame);
     }
 
     public void newTour(Connection c) {
@@ -171,7 +167,7 @@ public class NetworkListener extends Listener {
             pNames.name2 = playersNames[1];
             pNames.name3 = playersNames[2];
             pNames.name4 = playersNames[3];
-            
+
             ServerPrime.server.sendToAllTCP(pNames);
 
         }
@@ -202,7 +198,7 @@ public class NetworkListener extends Listener {
                             p.y = pl.y;
                             p.id = pl.id;
                             ServerPrime.server.sendToAllTCP(p);
-                            rewardPosition=deadPlayers;
+                            rewardPosition = deadPlayers;
                         }
                     }
                 }

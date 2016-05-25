@@ -61,6 +61,7 @@ public class ServerPrime {
         kryo.register(Packet.PacketNewTour.class);
         kryo.register(Packet.PacketReadyPlayer.class);
         kryo.register(Packet.PacketStart.class);
+        kryo.register(Packet.PacketEndGame.class);
         
     }
 
