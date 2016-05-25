@@ -28,6 +28,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.concurrent.Task;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.layout.GridPane;
 
 /**
  * Created by Michał Martyniak and company :P on 19.03.2016.
@@ -303,6 +307,58 @@ public class Snake extends Listener {
         executor.shutdown();
 
     }
+    public void endGame() {
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Koniec gry!");
+
+        ButtonType yesButtonType = new ButtonType("Tak", ButtonBar.ButtonData.OK_DONE);
+        ButtonType noButtonType = new ButtonType("Nie", ButtonBar.ButtonData.CANCEL_CLOSE);
+        dialog.getDialogPane().getButtonTypes().addAll(yesButtonType, noButtonType);
+
+        String image = Snake.class.getResource("resources/bg.png").toExternalForm();
+        dialog.getDialogPane().setStyle("-fx-background-image: url('" + image + "'); "
+                + "-fx-background-repeat: repeat;");
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+
+        Label loginLabel = new Label("Login:");
+        loginLabel.setStyle("-fx-text-fill: white;" + "-fx-font-weight: bold;");
+        grid.add(loginLabel, 1, 0);
+
+        Label pointsLabel = new Label("Wynik:");
+        pointsLabel.setStyle("-fx-text-fill: white;" + "-fx-font-weight: bold;");
+        grid.add(pointsLabel, 2, 0);
+
+        for (int i = 0; i < 4; i++) {
+            Label name = new Label(playersNames[i]);
+            name.setStyle("-fx-text-fill: white;" + "-fx-font-weight: italic;");
+            Label points = new Label(scores[i].getText());
+            points.setStyle("-fx-text-fill: white;" + "-fx-font-weight: italic;");
+            grid.add(name, 1, i + 2);
+            grid.add(points, 2, i + 2);
+        }
+
+        Label playAgain = new Label("Grasz jeszcze raz?\n");
+        playAgain.setStyle("-fx-text-fill: white;" + "-fx-font-weight: bold;");
+        grid.add(playAgain, 1, 8);
+
+        dialog.getDialogPane().setContent(grid);
+
+        dialog.showAndWait();
+        /*
+        if (dialog.getResult() == yesButtonType){
+
+
+
+        // MAAAAAAAAAAAAAAAAAAAAAAAATI, TU MOŻNA WYCZYŚCIĆ WSZYSTKO :D   
+
+
+        }
+        
+         */
+    }
 
     //reaction to Package from server
     public void received(Connection c, Object o) {
@@ -325,6 +381,13 @@ public class Snake extends Listener {
         if (o instanceof Packet.PacketDead) {
             canMove = true;
             lifeStatus = LifeStatus.DEAD;
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    endGame();
+                }
+
+            });
         }
         if (o instanceof Packet.PacketStart) {
             beReady();
