@@ -96,7 +96,8 @@ public class Snake extends Listener {
 
         }
 
-        lastKey = KeyCode.K;                      //no key is pressed at the beginning
+        lastKey = KeyCode.S;                      //no key is pressed at the beginning
+        temKey= KeyCode.S;
         points = 0;
         lifeStatus = LifeStatus.ALIVE;            //snake is alive
         int[] temp = new int[4];
@@ -171,7 +172,8 @@ public class Snake extends Listener {
                     this.ready = true;
                 }
                 break;
-            default:                                 //no key - skip that method
+            default:  
+                lastKey=temKey;
                 return;
         }
     }
