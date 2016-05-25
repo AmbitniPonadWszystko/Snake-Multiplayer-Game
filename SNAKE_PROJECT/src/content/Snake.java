@@ -40,6 +40,7 @@ public class Snake extends Listener {
 
     public static Label[][] board = new Label[sizeWidth][sizeHeight];
     public static Label[] scores = new Label[4];
+    public static Label[] names = new Label[4];
     public static Label tour;
     public static Label second;
     public static BarrierType[][] mask = new BarrierType[sizeWidth][sizeHeight];
@@ -48,7 +49,6 @@ public class Snake extends Listener {
     private Point head;             //coordinates of snake's head
     private KeyCode lastKey;        //direction variable, allow to continue snake's movement in that direction constantly
 
-    
     private Integer points;             //player's points
     private LifeStatus lifeStatus;  //to know more look a defined enum a few lines above this one ^
     private Image image;
@@ -64,10 +64,10 @@ public class Snake extends Listener {
     private Image player3;
     private Image player4;
     private Image bg;
-    
+
     // Array with names of all players connected   playerNamer[connectionID] is this name;
     private String playersNames[] = new String[4];
- 
+
     private boolean ready;                      //player is ready to play
     private static boolean start;               //all players are ready to play
 
@@ -80,7 +80,6 @@ public class Snake extends Listener {
         scanner = new Scanner(System.in);
         actualTranslation = new Point(0, 0);
         client = new Client();
-        
 
         register();
         initImages();
@@ -89,7 +88,7 @@ public class Snake extends Listener {
         try {
             Log.info("Please Enter the IP");
             // 1 timeout, 2 - IP, 3 - PORT
-            client.connect(500000000, loginWindow.getIpAdress() , 7474, 7474);
+            client.connect(500000000, loginWindow.getIpAdress(), 7474, 7474);
         } catch (Exception ex) {
             ex.printStackTrace();
             client.stop();
@@ -97,11 +96,14 @@ public class Snake extends Listener {
         }
 
         lastKey = KeyCode.S;                      //no key is pressed at the beginning
-        temKey= KeyCode.S;
+        temKey = KeyCode.S;
         points = 0;
         lifeStatus = LifeStatus.ALIVE;            //snake is alive
+
+
         int[] temp = new int[4];
         initScoreAndTour(temp, 1);
+        initNames2();
 
     }
 
@@ -172,8 +174,8 @@ public class Snake extends Listener {
                     this.ready = true;
                 }
                 break;
-            default:  
-                lastKey=temKey;
+            default:
+                lastKey = temKey;
                 return;
         }
     }
@@ -277,6 +279,16 @@ public class Snake extends Listener {
 
     }
 
+    public void initNames2() {
+       
+                for (int i = 0; i < 4; i++) {
+                    names[i] = new Label();
+                    setter(names[i], 30, i * 220 + 100);
+                }
+            
+
+    }
+
     //show 3, 2, 1 when all players are ready
     public void beReady() {
 
@@ -317,156 +329,169 @@ public class Snake extends Listener {
         if (o instanceof Packet.PacketStart) {
             beReady();
             Log.info("start");
+            Log.info(tour.getText());
+//            if(tour.getText().equals("tura: 1"))
+//                
+//            
         }
-        if (o instanceof Packet.PacketAddPlayer) {
-            PacketAddPlayer packet = (PacketAddPlayer) o;
-            MPPlayer newPlayer = new MPPlayer();
-            players.put(packet.id, newPlayer);
-            head = new Point(packet.x, packet.y);
-            connectionID = packet.id;
-            if (packet.id == 1) {
-                image = player1;
-            } else if (packet.id == 2) {
-                image = player2;
-            } else if (packet.id == 3) {
-                image = player3;
-            } else if (packet.id == 4) {
-                image = player4;
+            if (o instanceof Packet.PacketAddPlayer) {
+                PacketAddPlayer packet = (PacketAddPlayer) o;
+                MPPlayer newPlayer = new MPPlayer();
+                players.put(packet.id, newPlayer);
+                head = new Point(packet.x, packet.y);
+                connectionID = packet.id;
+                if (packet.id == 1) {
+                    image = player1;
+                } else if (packet.id == 2) {
+                    image = player2;
+                } else if (packet.id == 3) {
+                    image = player3;
+                } else if (packet.id == 4) {
+                    image = player4;
+                }
+
             }
 
-        }
-        
-        if (o instanceof PacketNames) {
-            PacketNames packet = (PacketNames) o;
-            playersNames[0] = packet.name1;
-            playersNames[1] = packet.name2;
-            playersNames[2] = packet.name3;
-            playersNames[3] = packet.name4;
-            Log.info(playersNames[0] + " " + playersNames[1] + " " + playersNames[2] + " " + playersNames[3]);
-            
-        }
+            if (o instanceof PacketNames) {
+                PacketNames packet = (PacketNames) o;
+                playersNames[0] = packet.name1;
+                playersNames[1] = packet.name2;
+                playersNames[2] = packet.name3;
+                playersNames[3] = packet.name4;
+                Log.info(playersNames[0] + " " + playersNames[1] + " " + playersNames[2] + " " + playersNames[3]);
 
-        if (o instanceof PacketNewTour) {
+            }
 
-            Log.info("New Tour");
-            int[] sc = new int[4];
-            sc[2] = ((PacketNewTour) o).score1;
-            sc[0] = ((PacketNewTour) o).score2;
-            sc[3] = ((PacketNewTour) o).score3;
-            sc[1] = ((PacketNewTour) o).score4;
+            if (o instanceof PacketNewTour) {
 
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                    removeScoreAndTour();
-                    initScoreAndTour(sc, ((PacketNewTour) o).tour);
-                    ready = false;
-                    start = false;
-                    //setting snake's head
-                    switch (connectionID) {
-                        case 1:
-                            head.x = ((PacketNewTour) o).x1;
-                            head.y = ((PacketNewTour) o).y1;
-                            break;
-                        case 2:
-                            head.x = ((PacketNewTour) o).x2;
-                            head.y = ((PacketNewTour) o).y2;
-                            break;
-                        case 3:
-                            head.x = ((PacketNewTour) o).x3;
-                            head.y = ((PacketNewTour) o).y3;
-                            break;
-                        case 4:
-                            head.x = ((PacketNewTour) o).x4;
-                            head.y = ((PacketNewTour) o).y4;
-                            break;
-                        default:
-                            break;
+                Log.info("New Tour");
+                int[] sc = new int[4];
+                sc[2] = ((PacketNewTour) o).score1;
+                sc[0] = ((PacketNewTour) o).score2;
+                sc[3] = ((PacketNewTour) o).score3;
+                sc[1] = ((PacketNewTour) o).score4;
+
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        removeScoreAndTour();
+                        initScoreAndTour(sc, ((PacketNewTour) o).tour);
+                        ready = false;
+                        start = false;
+                        //setting snake's head
+                        switch (connectionID) {
+                            case 1:
+                                head.x = ((PacketNewTour) o).x1;
+                                head.y = ((PacketNewTour) o).y1;
+                                break;
+                            case 2:
+                                head.x = ((PacketNewTour) o).x2;
+                                head.y = ((PacketNewTour) o).y2;
+                                break;
+                            case 3:
+                                head.x = ((PacketNewTour) o).x3;
+                                head.y = ((PacketNewTour) o).y3;
+                                break;
+                            case 4:
+                                head.x = ((PacketNewTour) o).x4;
+                                head.y = ((PacketNewTour) o).y4;
+                                break;
+                            default:
+                                break;
+                        }
+
+                        //new board
+                        for (int x = 1; x < sizeWidth - 1; x++) {
+                            for (int y = 1; y < sizeHeight - 1; y++) {
+                                board[x][y].setGraphic(new ImageView(bg));
+                            }
+                        }
+                        //locate snake's heads on board
+                        board[((PacketNewTour) o).x1][((PacketNewTour) o).y1].setGraphic(new ImageView(player1));
+                        if (((PacketNewTour) o).count > 1) {
+                            board[((PacketNewTour) o).x2][((PacketNewTour) o).y2].setGraphic(new ImageView(player2));
+                        }
+                        if (((PacketNewTour) o).count > 2) {
+                            board[((PacketNewTour) o).x3][((PacketNewTour) o).y3].setGraphic(new ImageView(player3));
+                        }
+                        if (((PacketNewTour) o).count > 3) {
+                            board[((PacketNewTour) o).x4][((PacketNewTour) o).y4].setGraphic(new ImageView(player4));
+                        }
+                        lifeStatus = LifeStatus.ALIVE;
+                        lastKey = KeyCode.K;
                     }
+                });
+            }
 
-                    //new board
-                    for (int x = 1; x < sizeWidth - 1; x++) {
-                        for (int y = 1; y < sizeHeight - 1; y++) {
-                            board[x][y].setGraphic(new ImageView(bg));
+            //Points for another snakes
+            if (o instanceof PacketPoint) {
+                int x = ((PacketPoint) o).x;
+                int y = ((PacketPoint) o).y;
+                int id = ((PacketPoint) o).id;
+                //you can't update the UI from a thread that is not the 
+                //application thread. But still, if you really want to modify your UI from a different thread 
+                // use the Platform.runlater(new Runnable()) method. And put your modifications inside the Runnable object.
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        //1 - blue, 2 - red, 3 - yellow, 4 - pinky winky
+                        if (id == 1) {
+                            board[x][y].setGraphic(new ImageView(player1));
+                        }
+                        if (id == 2) {
+                            board[x][y].setGraphic(new ImageView(player2));
+                        }
+                        if (id == 3) {
+                            board[x][y].setGraphic(new ImageView(player3));
+                        }
+                        if (id == 4) {
+                            board[x][y].setGraphic(new ImageView(player4));
+                        }
+                        if (id == connectionID) {
+                            canMove = true;
+                            head.setLocation(new Point(x, y));
                         }
                     }
-                    //locate snake's heads on board
-                    board[((PacketNewTour) o).x1][((PacketNewTour) o).y1].setGraphic(new ImageView(player1));
-                    if (((PacketNewTour) o).count > 1) {
-                        board[((PacketNewTour) o).x2][((PacketNewTour) o).y2].setGraphic(new ImageView(player2));
-                    }
-                    if (((PacketNewTour) o).count > 2) {
-                        board[((PacketNewTour) o).x3][((PacketNewTour) o).y3].setGraphic(new ImageView(player3));
-                    }
-                    if (((PacketNewTour) o).count > 3) {
-                        board[((PacketNewTour) o).x4][((PacketNewTour) o).y4].setGraphic(new ImageView(player4));
-                    }
-                    lifeStatus = LifeStatus.ALIVE;
-                    lastKey = KeyCode.K;
-                }
-            });
-        }
+                });
+            }
+            if (o instanceof PacketHead) {
+                int c1 = ((PacketHead) o).count;
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (c1 >= 1) {
+                            int x1 = ((PacketHead) o).x1;
+                            int y1 = ((PacketHead) o).y1;
+                            board[x1][y1].setGraphic(new ImageView(player1));
+                            System.out.println(playersNames[0]+ playersNames[1]);
+                            
+                            names[0].setText(playersNames[0]);
 
-        //Points for another snakes
-        if (o instanceof PacketPoint) {
-            int x = ((PacketPoint) o).x;
-            int y = ((PacketPoint) o).y;
-            int id = ((PacketPoint) o).id;
-            //you can't update the UI from a thread that is not the 
-            //application thread. But still, if you really want to modify your UI from a different thread 
-            // use the Platform.runlater(new Runnable()) method. And put your modifications inside the Runnable object.
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                    //1 - blue, 2 - red, 3 - yellow, 4 - pinky winky
-                    if (id == 1) {
-                        board[x][y].setGraphic(new ImageView(player1));
+                        }
+                        if (c1 >= 2) {
+                            int x2 = ((PacketHead) o).x2;
+                            int y2 = ((PacketHead) o).y2;
+                            board[x2][y2].setGraphic(new ImageView(player2));
+                            System.out.println(playersNames[0]+ playersNames[1]);
+                            names[1].setText(playersNames[1]);
+                        }
+                        if (c1 >= 3) {
+                            int x3 = ((PacketHead) o).x3;
+                            int y3 = ((PacketHead) o).y3;
+                            board[x3][y3].setGraphic(new ImageView(player3));
+                            names[2].setText(playersNames[2]);
+                        }
+                        if (c1 >= 4) {
+                            int x4 = ((PacketHead) o).x4;
+                            int y4 = ((PacketHead) o).y4;
+                            board[x4][y4].setGraphic(new ImageView(player4));
+                            names[3].setText(playersNames[3]);
+                        }
                     }
-                    if (id == 2) {
-                        board[x][y].setGraphic(new ImageView(player2));
-                    }
-                    if (id == 3) {
-                        board[x][y].setGraphic(new ImageView(player3));
-                    }
-                    if (id == 4) {
-                        board[x][y].setGraphic(new ImageView(player4));
-                    }
-                    if (id == connectionID) {
-                        canMove = true;
-                        head.setLocation(new Point(x, y));
-                    }
-                }
-            });
-        }
-        if (o instanceof PacketHead) {
-            int c1 = ((PacketHead) o).count;
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                    if (c1 >= 1) {
-                        int x1 = ((PacketHead) o).x1;
-                        int y1 = ((PacketHead) o).y1;
-                        board[x1][y1].setGraphic(new ImageView(player1));
-                    }
-                    if (c1 >= 2) {
-                        int x2 = ((PacketHead) o).x2;
-                        int y2 = ((PacketHead) o).y2;
-                        board[x2][y2].setGraphic(new ImageView(player2));
-                    }
-                    if (c1 >= 3) {
-                        int x3 = ((PacketHead) o).x3;
-                        int y3 = ((PacketHead) o).y3;
-                        board[x3][y3].setGraphic(new ImageView(player3));
-                    }
-                    if (c1 >= 4) {
-                        int x4 = ((PacketHead) o).x4;
-                        int y4 = ((PacketHead) o).y4;
-                        board[x4][y4].setGraphic(new ImageView(player4));
-                    }
-                }
-            });
+                });
+            }
+
         }
 
     }
 
-}

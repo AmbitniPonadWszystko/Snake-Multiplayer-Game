@@ -43,6 +43,7 @@ public class NetworkListener extends Listener {
                     player.y = 9;
                     heads.x1 = player.x;
                     heads.y1 = player.y;
+                    
                     break;
                 case 2:
                     player.x = 60;
@@ -170,6 +171,7 @@ public class NetworkListener extends Listener {
             pNames.name2 = playersNames[1];
             pNames.name3 = playersNames[2];
             pNames.name4 = playersNames[3];
+            
             ServerPrime.server.sendToAllTCP(pNames);
 
         }
