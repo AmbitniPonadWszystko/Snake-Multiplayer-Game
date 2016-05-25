@@ -1,3 +1,4 @@
+
 package content;
 
 import com.esotericsoftware.kryo.Kryo;
@@ -70,6 +71,7 @@ public class Snake extends Listener {
     private KeyCode temKey;
   
     public Snake() {
+        
         ready=false;
         start=false;
         scanner = new Scanner(System.in);
@@ -83,14 +85,15 @@ public class Snake extends Listener {
         try {
             Log.info("Please Enter the IP");
             // 1 timeout, 2 - IP, 3 - PORT
-            client.connect(500000000, "localhost", 7474, 7474);
+            client.connect(500000000, "192.168.0.14", 7474, 7474);
         } catch (Exception ex) {
             ex.printStackTrace();
             client.stop();
 
         }
 
-        lastKey = KeyCode.K;                      //no key is pressed at the beginning
+        lastKey = KeyCode.S;    
+        temKey= KeyCode.S;
         points = 0;
         lifeStatus = LifeStatus.ALIVE;            //snake is alive
         int[] temp=new int[4];
@@ -166,7 +169,9 @@ public class Snake extends Listener {
                     this.ready=true;
                 }
                 break;
-            default:                                 //no key - skip that method
+            default: 
+                lastKey=temKey;
+                //no key - skip that method
                 return;
         }
     }
