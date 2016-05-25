@@ -26,9 +26,12 @@ public class NetworkListener extends Listener {
     private int tabDeadPlayer[] = new int[4];
     private String playersNames[] = new String[4];
     private int playersScore[] = new int[4];
+    private int[] rewards={0,1,2,3};
+    private int rewardPosition;
 
     @Override
     public void connected(Connection c) {
+        rewardPosition=0;
         connectionCounter++; // Someone has connected
         Player player = new Player();
         // more than 4 players are not allowed
@@ -89,9 +92,18 @@ public class NetworkListener extends Listener {
         connectionCounter--;
         Log.info("[SERVER] Someone has disconnected.");
     }
+       private void endGame(){
+        
+    
+    
+    
+    
+    
+    
+    }
 
     public void newTour(Connection c) {
-        if (tour <= 5) {
+        if (tour <= 9) {
             //Resurrect all snakes !!
             for (Player pl : listOfPlayers) {
                 pl.isAlive = true;
@@ -124,6 +136,7 @@ public class NetworkListener extends Listener {
             readyPlayers = 0;
             deadPlayers = 0;
         } else {
+            endGame();
             System.out.println("END");
         }
 
@@ -187,7 +200,7 @@ public class NetworkListener extends Listener {
                             p.y = pl.y;
                             p.id = pl.id;
                             ServerPrime.server.sendToAllTCP(p);
-
+                            rewardPosition=deadPlayers;
                         }
                     }
                 }
@@ -207,8 +220,7 @@ public class NetworkListener extends Listener {
 
                     }
                 }
-
-                tabDeadPlayer[((PacketPoint) o).id - 1] = deadPlayers + 1;
+                tabDeadPlayer[((PacketPoint) o).id - 1] = rewards[rewardPosition];
                 deadPlayers += 1;
                 if (deadPlayers == connectionCounter) {
                     newTour(c);
