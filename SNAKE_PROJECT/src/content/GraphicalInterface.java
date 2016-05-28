@@ -69,8 +69,7 @@ public class GraphicalInterface extends Application {
                     pane.getChildren().add(board[x][y]);
                 }
             }
-        }
-        
+        }  
         
     }
 

@@ -47,10 +47,19 @@ public class Packet {
     
         public static class PacketNames {
 
-        String name1;
-        String name2;
-        String name3;
-        String name4;
+        public String name1;
+        public String name2;
+        public String name3;
+        public String name4;
         
     }
+        public static class PacketWantAgain{
+            public int id;
+        }
+        
+        public static class PacketNotWantAgain{
+            public int id;
+        }
+        
+        public static class PacketExit{}
 }

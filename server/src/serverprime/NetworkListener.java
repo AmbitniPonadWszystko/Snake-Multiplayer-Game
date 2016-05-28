@@ -28,7 +28,7 @@ public class NetworkListener extends Listener {
     private int playersScore[] = new int[4];
     private int[] rewards = {0, 1, 2, 3};
     private int rewardPosition;
-
+    private int playersAnsered;
     @Override
     public void connected(Connection c) {
         rewardPosition = 0;
@@ -97,10 +97,11 @@ public class NetworkListener extends Listener {
     private void endGame() {
         PacketEndGame endGame = new PacketEndGame();
         ServerPrime.server.sendToAllTCP(endGame);
+        playersAnsered=0;
     }
 
     public void newTour(Connection c) {
-        if (tour <= 9) {
+        
             //Resurrect all snakes !!
             for (Player pl : listOfPlayers) {
                 pl.isAlive = true;
@@ -132,7 +133,7 @@ public class NetworkListener extends Listener {
             ServerPrime.server.sendToAllTCP(newTour);
             readyPlayers = 0;
             deadPlayers = 0;
-        } else {
+        if (tour > 10) {
             endGame();
             System.out.println("END");
         }
@@ -148,6 +149,24 @@ public class NetworkListener extends Listener {
                 ServerPrime.server.sendToAllTCP(odp);
 
             }
+
+        }
+        if (o instanceof PacketWantAgain) {
+           playersAnsered++;
+           if(playersAnsered==connectionCounter){
+               tour=0;
+               for(int i=0; i<4; i++)
+                   playersScore[i]=0;
+               for(int i=0; i<4; i++)
+                   tabDeadPlayer[i]=0;
+               newTour(c);
+           }
+        }
+        if (o instanceof PacketNotWantAgain) {
+            PacketExit p= new PacketExit();
+            ServerPrime.server.sendToAllTCP(p);
+            System.exit(0);
+            
 
         }
         if (o instanceof PacketLoginRequested) {
