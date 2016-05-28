@@ -238,6 +238,9 @@ public class Snake extends Listener {
         kryo.register(Packet.PacketReadyPlayer.class);
         kryo.register(Packet.PacketStart.class);
         kryo.register(Packet.PacketEndGame.class);
+        kryo.register(Packet.PacketWantAgain.class);
+        kryo.register(Packet.PacketNotWantAgain.class);
+        kryo.register(Packet.PacketExit.class);
     }
 
     public void connected(Connection cnctn) {
@@ -343,7 +346,7 @@ public class Snake extends Listener {
         }
 
         Label playAgain = new Label("Grasz jeszcze raz?\n");
-        playAgain.setStyle("-fx-text-fill: white;" + "-fx-font-weight: bold;");
+        playAgain.setStyle("-fx-text-fill: white;" + " -fx-font-weight: bold;");
         grid.add(playAgain, 1, 8);
 
         dialog.getDialogPane().setContent(grid);
@@ -351,7 +354,16 @@ public class Snake extends Listener {
         dialog.showAndWait();
         
         if (dialog.getResult() == yesButtonType){
-           // CZY CHCEMY ZACZAC NOWA GRE
+           System.out.println("chce od nowa");
+            PacketWantAgain p = new PacketWantAgain();
+            p.id=connectionID;
+            client.sendTCP(p);
+        }
+        else{
+            PacketNotWantAgain p = new PacketNotWantAgain();
+            p.id=connectionID;
+            client.sendTCP(p);            
+            System.exit(0);
         }
         
          
@@ -378,6 +390,9 @@ public class Snake extends Listener {
         if (o instanceof Packet.PacketDead) {
             canMove = true;
             lifeStatus = LifeStatus.DEAD;
+        }
+        if (o instanceof Packet.PacketExit) {
+            System.exit(0);
         }
         if (o instanceof Packet.PacketStart) {
             beReady();
