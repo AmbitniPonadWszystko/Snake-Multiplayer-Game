@@ -1,5 +1,5 @@
 package serverprime;
-
+//sa imiona
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.minlog.Log;
@@ -81,6 +81,7 @@ public class NetworkListener extends Listener {
             player.color = "bg";
             player.id = c.getID();
             player.isAlive = true;
+            //player.name=playersNames[c.getID()];
             listOfPlayers.add(player); //adding next snake to list
 
             //ZMIENIC NAZWE NA PacketSetImage
@@ -90,7 +91,8 @@ public class NetworkListener extends Listener {
             p.id = player.id;
             c.sendTCP(p);
             ServerPrime.server.sendToAllTCP(heads);
-
+            
+            //sentNames();
             Log.info("[SERVER] Someone has connected.");
 
         } else {
@@ -149,6 +151,31 @@ public class NetworkListener extends Listener {
         }
 
     }
+    public void sentNames(){
+         PacketNames pNames = new PacketNames();
+           
+          for(Player player : listOfPlayers)
+            {
+                switch (player.color){
+                        case "pink" :                      
+                            pNames.name4 = player.name;
+                                break;
+                        case "blue" :
+                            pNames.name1 = player.name;
+                            break;
+                        case "orange":
+                            pNames.name3 = player.name;
+                            break;
+                        case "red" :
+                             pNames.name2 = player.name;
+                             break;
+                }
+            }
+    
+           ServerPrime.server.sendToAllTCP(pNames);
+    
+    
+    }
 
     @Override
     public void received(Connection c, Object o) {
@@ -199,7 +226,7 @@ public class NetworkListener extends Listener {
                 }
                 ServerPrime.server.sendToAllTCP(heads); //send to ALL connected players packet with heads using TCP protocol
                 ServerPrime.server.sendToAllTCP(p1);
-            
+                sentNames();                          
 
         }
 
@@ -267,6 +294,8 @@ public class NetworkListener extends Listener {
             if (connectionCounter < 5) {
                 String name = ((PacketLoginRequested) o).name;
                 playersNames[c.getID() - 1] = name;
+                listOfPlayers.get(c.getID()-1).name=name;
+                //sentNames();
                 loginAnswer.accepted = true;
             } else {
                 loginAnswer.accepted = false;
@@ -274,13 +303,12 @@ public class NetworkListener extends Listener {
 
             c.sendUDP(loginAnswer);
 
-            PacketNames pNames = new PacketNames();
-            pNames.name1 = playersNames[0];
-            pNames.name2 = playersNames[1];
-            pNames.name3 = playersNames[2];
-            pNames.name4 = playersNames[3];
-
-            ServerPrime.server.sendToAllTCP(pNames);
+//            PacketNames pNames = new PacketNames();
+//            pNames.name1 = playersNames[0];
+//            pNames.name2 = playersNames[1];
+//            pNames.name3 = playersNames[2];
+//            pNames.name4 = playersNames[3];
+            
 
         }
 
