@@ -46,4 +46,13 @@ public class Packet {
         String name4;
         
     }
+         public static class PacketWantAgain{
+            public int id;
+        }
+        
+        public static class PacketNotWantAgain{
+            public int id;
+        }
+        
+         public static class PacketExit{}
 }

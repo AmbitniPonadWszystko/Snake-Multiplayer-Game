@@ -62,7 +62,9 @@ public class ServerPrime {
         kryo.register(Packet.PacketReadyPlayer.class);
         kryo.register(Packet.PacketStart.class);
         kryo.register(Packet.PacketEndGame.class);
-        
+        kryo.register(Packet.PacketWantAgain.class);
+        kryo.register(Packet.PacketNotWantAgain.class);
+        kryo.register(Packet.PacketExit.class);
     }
 
     public static void main(String[] args) {
