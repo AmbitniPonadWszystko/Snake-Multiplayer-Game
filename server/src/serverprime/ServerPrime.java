@@ -65,6 +65,13 @@ public class ServerPrime {
         kryo.register(Packet.PacketWantAgain.class);
         kryo.register(Packet.PacketNotWantAgain.class);
         kryo.register(Packet.PacketExit.class);
+        kryo.register(Packet.PacketColors.class);
+        kryo.register(Packet.PacketAskForColors.class);
+        kryo.register(Packet.PacketAskForColor.class);
+        kryo.register(Packet.PacketSendColor.class);
+        kryo.register(Packet.PacketPlayersColors.class);
+        kryo.register(Packet.PacketColorAccepted.class);
+        kryo.register(Packet.PacketColorRefused.class);
     }
 
     public static void main(String[] args) {

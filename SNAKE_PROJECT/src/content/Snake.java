@@ -30,6 +30,7 @@ import java.util.logging.Logger;
 import javafx.concurrent.Task;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.Dialog;
 import javafx.scene.layout.GridPane;
 
@@ -69,6 +70,21 @@ public class Snake extends Listener {
     private Image player4;
     private Image bg;
 
+    private String colorPlayer1;
+    private String colorPlayer2;
+    private String colorPlayer3;
+    private String colorPlayer4;
+
+    public static int blue = 0;
+    public static int red = 0;
+    public static int orange = 0;
+    public static int pink = 0;
+
+    static boolean canStart = false;
+    static String myColor;
+    static boolean isAsking = false;
+    static boolean isColorTaken = true;
+
     // Array with names of all players connected   playerNamer[connectionID] is this name;
     private String playersNames[] = new String[4];
 
@@ -79,6 +95,7 @@ public class Snake extends Listener {
     private KeyCode temKey;
 
     public Snake() {
+
         ready = false;
         start = false;
         scanner = new Scanner(System.in);
@@ -86,7 +103,7 @@ public class Snake extends Listener {
         client = new Client();
         initNames2();
         register();
-        initImages();
+        // initImages();
         client.addListener(this);
         client.start();
         try {
@@ -107,10 +124,14 @@ public class Snake extends Listener {
         int[] temp = new int[4];
         initScoreAndTour(temp, 1);
 
+        PacketAskForColors ask = new PacketAskForColors();
+        client.sendTCP(ask);
+
     }
 
     public void initImages() {
-        player1 = new Image(getClass().getResourceAsStream("resources/blue.png"));
+        String lol = "blue";
+        player1 = new Image(getClass().getResourceAsStream("resources/" + lol + ".png"));
         player2 = new Image(getClass().getResourceAsStream("resources/red.png"));
         player3 = new Image(getClass().getResourceAsStream("resources/yellow.png"));
         player4 = new Image(getClass().getResourceAsStream("resources/pink.png"));
@@ -241,8 +262,78 @@ public class Snake extends Listener {
         kryo.register(Packet.PacketWantAgain.class);
         kryo.register(Packet.PacketNotWantAgain.class);
         kryo.register(Packet.PacketExit.class);
+        kryo.register(Packet.PacketColors.class);
+        kryo.register(Packet.PacketAskForColors.class);
+        kryo.register(Packet.PacketAskForColor.class);
+        kryo.register(Packet.PacketSendColor.class);
+        kryo.register(Packet.PacketPlayersColors.class);
+        kryo.register(Packet.PacketColorAccepted.class);
+        kryo.register(Packet.PacketColorRefused.class);
     }
-
+//   public void initNamesaAgain() {
+// 
+//        if(null != colorPlayer1)
+//            switch (colorPlayer1) {
+//            case "red":
+//                setter(names[0], 30, 72);
+//                break;
+//            case "pink":
+//                setter(names[0], 30, 337);
+//                break;
+//            case "blue":
+//                setter(names[0], 30, 603);
+//                break;
+//            default:
+//                setter(names[0], 30, 865);
+//                break;
+//        }
+//        if(null != colorPlayer2)
+//            switch (colorPlayer2) {
+//            case "red":
+//                setter(names[1], 30, 72);
+//                break;
+//            case "pink":
+//                setter(names[1], 30, 337);
+//                break;
+//            case "blue":
+//                setter(names[1], 30, 603);
+//                break;
+//            default:
+//                setter(names[1], 30, 865);
+//                break;
+//        }
+//        if(null != colorPlayer3)
+//            switch (colorPlayer3) {
+//            case "red":
+//                setter(names[2], 30, 72);
+//                break;
+//            case "pink":
+//                setter(names[2], 30, 337);
+//                break;
+//            case "blue":
+//                setter(names[2], 30, 603);
+//                break;
+//            default:
+//                setter(names[2], 30, 865);
+//                break;
+//        }
+//        if(null != colorPlayer4)
+//            switch (colorPlayer4) {
+//            case "red":
+//                setter(names[3], 30, 72);
+//                break;
+//            case "pink":
+//                setter(names[3], 30, 337);
+//                break;
+//            case "blue":
+//                setter(names[3], 30, 603);
+//                break;
+//            default:
+//                setter(names[3], 30, 865);
+//                break;
+//        }        
+//    }
+   
     public void connected(Connection cnctn) {
         Log.info("[CLIENT] You have connected! hello " + loginWindow.getPlayerName());
         PacketLoginRequested p = new PacketLoginRequested();
@@ -291,6 +382,7 @@ public class Snake extends Listener {
             names[i] = new Label();
 
         }
+
         setter(names[0], 30, 72);
         setter(names[1], 30, 337);
         setter(names[2], 30, 603);
@@ -352,25 +444,48 @@ public class Snake extends Listener {
         dialog.getDialogPane().setContent(grid);
 
         dialog.showAndWait();
-        
-        if (dialog.getResult() == yesButtonType){
-           System.out.println("chce od nowa");
+
+        if (dialog.getResult() == yesButtonType) {
+            System.out.println("chce od nowa");
             PacketWantAgain p = new PacketWantAgain();
-            p.id=connectionID;
+            p.id = connectionID;
             client.sendTCP(p);
-        }
-        else{
+        } else {
             PacketNotWantAgain p = new PacketNotWantAgain();
-            p.id=connectionID;
-            client.sendTCP(p);            
+            p.id = connectionID;
+            client.sendTCP(p);
             System.exit(0);
         }
-        
-         
+
     }
 
     //reaction to Package from server
     public void received(Connection c, Object o) {
+
+        if (o instanceof Packet.PacketColors) {
+
+            PacketColors packet = (PacketColors) o;
+            red = packet.red;
+            blue = packet.blue;
+            orange = packet.orange;
+            pink = packet.pink;
+            canStart = true;
+        }
+        if (o instanceof Packet.PacketPlayersColors) {
+
+            PacketPlayersColors packet = (PacketPlayersColors) o;
+            colorPlayer1 = packet.c1;
+            player1 = new Image(getClass().getResourceAsStream("resources/" + packet.c1 + ".png"));
+            colorPlayer2 = packet.c2;
+            player2 = new Image(getClass().getResourceAsStream("resources/" + packet.c2 + ".png"));
+            colorPlayer3 = packet.c3;
+            player3 = new Image(getClass().getResourceAsStream("resources/" + packet.c3 + ".png"));
+            colorPlayer4 = packet.c4;
+            player4 = new Image(getClass().getResourceAsStream("resources/" + packet.c4 + ".png"));
+            bg = new Image(getClass().getResourceAsStream("resources/bg.png"));
+
+        }
+
         if (o instanceof Packet.PacketLoginAccepted) {
             boolean answer = ((Packet.PacketLoginAccepted) o).accepted;
 
@@ -385,6 +500,15 @@ public class Snake extends Listener {
         if (o instanceof Packet.PacketMessage) {
             String message = ((Packet.PacketMessage) o).message;
             Log.info(message);
+        }
+
+        if (o instanceof Packet.PacketColorAccepted) {
+            isColorTaken = false;
+            isAsking = false;
+        }
+        if (o instanceof Packet.PacketColorRefused) {
+            isColorTaken = true;
+            isAsking = false;
         }
 
         if (o instanceof Packet.PacketDead) {
@@ -403,6 +527,8 @@ public class Snake extends Listener {
 //            
         }
         if (o instanceof Packet.PacketAddPlayer) {
+
+            //initImages();
             PacketAddPlayer packet = (PacketAddPlayer) o;
             MPPlayer newPlayer = new MPPlayer();
             players.put(packet.id, newPlayer);
@@ -543,6 +669,7 @@ public class Snake extends Listener {
         if (o instanceof PacketHead) {
             int c1 = ((PacketHead) o).count;
             Log.info(playersNames[0] + " " + playersNames[1] + " " + playersNames[2] + " " + playersNames[3]);
+          //  initNamesaAgain();
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {

@@ -17,4 +17,5 @@ public class Player {
     public Connection c;
     int id;
     boolean isAlive;
+    String color;
 }

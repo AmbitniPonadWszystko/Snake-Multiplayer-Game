@@ -29,6 +29,15 @@ public class NetworkListener extends Listener {
     private int[] rewards = {0, 1, 2, 3};
     private int rewardPosition;
     private int playersAnsered;
+
+    //collor
+    private int blue = 1;
+    private int red = 1;
+    private int orange = 1;
+    private int pink = 1;
+    
+    boolean colorTaken = false;
+
     @Override
     public void connected(Connection c) {
         rewardPosition = 0;
@@ -66,13 +75,13 @@ public class NetworkListener extends Listener {
                 default:
                     break;
             }
+            ServerPrime.mask[player.x][player.y] = BarrierType.SNAKE;
             heads.count = connectionCounter; //helps in setting up heads       
             player.c = c;
+            player.color = "bg";
             player.id = c.getID();
             player.isAlive = true;
             listOfPlayers.add(player); //adding next snake to list
-
-            ServerPrime.server.sendToAllTCP(heads); //send to ALL connected players packet with heads using TCP protocol
 
             //ZMIENIC NAZWE NA PacketSetImage
             PacketAddPlayer p = new PacketAddPlayer();
@@ -80,6 +89,7 @@ public class NetworkListener extends Listener {
             p.y = player.y;
             p.id = player.id;
             c.sendTCP(p);
+            ServerPrime.server.sendToAllTCP(heads);
 
             Log.info("[SERVER] Someone has connected.");
 
@@ -97,42 +107,42 @@ public class NetworkListener extends Listener {
     private void endGame() {
         PacketEndGame endGame = new PacketEndGame();
         ServerPrime.server.sendToAllTCP(endGame);
-        playersAnsered=0;
+        playersAnsered = 0;
     }
 
     public void newTour(Connection c) {
-        
-            //Resurrect all snakes !!
-            for (Player pl : listOfPlayers) {
-                pl.isAlive = true;
 
-            }
-            Log.info("New Tour");
-            tour += 1;
-            for (int i = 0; i < 4; i++) {
-                playersScore[i] += tabDeadPlayer[i];
-            }
-            Random generator = new Random();
-            PacketNewTour newTour = new PacketNewTour();
-            newTour.x1 = generator.nextInt(sizeWidth - 2) + 1;
-            newTour.y1 = generator.nextInt(sizeHeight - 2) + 1;
-            newTour.x2 = generator.nextInt(sizeWidth - 2) + 1;
-            newTour.y2 = generator.nextInt(sizeHeight - 2) + 1;
-            newTour.x3 = generator.nextInt(sizeWidth - 2) + 1;
-            newTour.y3 = generator.nextInt(sizeHeight - 2) + 1;
-            newTour.x4 = generator.nextInt(sizeWidth - 2) + 1;
-            newTour.y4 = generator.nextInt(sizeHeight - 2) + 1;
-            newTour.score1 = playersScore[0];
-            newTour.score2 = playersScore[1];
-            newTour.score3 = playersScore[2];
-            newTour.score4 = playersScore[3];
-            newTour.count = connectionCounter;
-            newTour.tour = tour;
-            ServerPrime.initBoard();
+        //Resurrect all snakes !!
+        for (Player pl : listOfPlayers) {
+            pl.isAlive = true;
 
-            ServerPrime.server.sendToAllTCP(newTour);
-            readyPlayers = 0;
-            deadPlayers = 0;
+        }
+        Log.info("New Tour");
+        tour += 1;
+        for (int i = 0; i < 4; i++) {
+            playersScore[i] += tabDeadPlayer[i];
+        }
+        Random generator = new Random();
+        PacketNewTour newTour = new PacketNewTour();
+        newTour.x1 = generator.nextInt(sizeWidth - 2) + 1;
+        newTour.y1 = generator.nextInt(sizeHeight - 2) + 1;
+        newTour.x2 = generator.nextInt(sizeWidth - 2) + 1;
+        newTour.y2 = generator.nextInt(sizeHeight - 2) + 1;
+        newTour.x3 = generator.nextInt(sizeWidth - 2) + 1;
+        newTour.y3 = generator.nextInt(sizeHeight - 2) + 1;
+        newTour.x4 = generator.nextInt(sizeWidth - 2) + 1;
+        newTour.y4 = generator.nextInt(sizeHeight - 2) + 1;
+        newTour.score1 = playersScore[0];
+        newTour.score2 = playersScore[1];
+        newTour.score3 = playersScore[2];
+        newTour.score4 = playersScore[3];
+        newTour.count = connectionCounter;
+        newTour.tour = tour;
+        ServerPrime.initBoard();
+
+        ServerPrime.server.sendToAllTCP(newTour);
+        readyPlayers = 0;
+        deadPlayers = 0;
         if (tour > 10) {
             endGame();
             System.out.println("END");
@@ -142,6 +152,66 @@ public class NetworkListener extends Listener {
 
     @Override
     public void received(Connection c, Object o) {
+
+        if (o instanceof PacketSendColor) {
+            PacketSendColor p = (PacketSendColor) o;
+            listOfPlayers.get(c.getID() - 1).color = p.color;
+            if ("blue".equals(p.color)) {
+                blue = 0;
+            }
+            if ("red".equals(p.color)) {
+                red = 0;
+            }
+            if ("orange".equals(p.color)) {
+                orange = 0;
+            }
+            if ("pink".equals(p.color)) {
+                pink = 0;
+            }
+
+                PacketPlayersColors p1 = new PacketPlayersColors();
+                if (connectionCounter == 1) {
+                    p1.c1 = listOfPlayers.get(0).color;
+                    p1.c2 = "bg";
+                    p1.c3 = "bg";
+                    p1.c4 = "bg";
+                }
+
+                if (connectionCounter == 2) {
+                    p1.c1 = listOfPlayers.get(0).color;
+                    p1.c2 = listOfPlayers.get(1).color;
+                    p1.c3 = "bg";
+                    p1.c4 = "bg";
+                }
+
+                if (connectionCounter == 3) {
+                    p1.c1 = listOfPlayers.get(0).color;
+                    p1.c2 = listOfPlayers.get(1).color;
+                    p1.c3 = listOfPlayers.get(2).color;
+                    p1.c4 = "bg";
+                }
+
+                if (connectionCounter == 4) {
+                    p1.c1 = listOfPlayers.get(0).color;
+                    p1.c2 = listOfPlayers.get(1).color;
+                    p1.c3 = listOfPlayers.get(2).color;
+                    p1.c4 = listOfPlayers.get(3).color;
+                }
+                ServerPrime.server.sendToAllTCP(heads); //send to ALL connected players packet with heads using TCP protocol
+                ServerPrime.server.sendToAllTCP(p1);
+            
+
+        }
+
+        if (o instanceof PacketAskForColors) {
+            PacketColors p = new PacketColors();
+            p.blue = blue;
+            p.orange = orange;
+            p.pink = pink;
+            p.red = red;
+            c.sendTCP(p);
+        }//        PacketEndGame endGame = new PacketEndGame();
+
         if (o instanceof PacketReadyPlayer) {
             readyPlayers += 1;
             if (readyPlayers == connectionCounter) {
@@ -152,21 +222,44 @@ public class NetworkListener extends Listener {
 
         }
         if (o instanceof PacketWantAgain) {
-           playersAnsered++;
-           if(playersAnsered==connectionCounter){
-               tour=0;
-               for(int i=0; i<4; i++)
-                   playersScore[i]=0;
-               for(int i=0; i<4; i++)
-                   tabDeadPlayer[i]=0;
-               newTour(c);
-           }
+            playersAnsered++;
+            if (playersAnsered == connectionCounter) {
+                tour = 0;
+                for (int i = 0; i < 4; i++) {
+                    playersScore[i] = 0;
+                }
+                for (int i = 0; i < 4; i++) {
+                    tabDeadPlayer[i] = 0;
+                }
+                newTour(c);
+            }
         }
+        if (o instanceof PacketAskForColor) {
+            PacketAskForColor p = (PacketAskForColor) o;
+            for(Player player : listOfPlayers)
+            {
+                System.out.println(player.color);
+
+                if(player.color.equals(p.colorName))
+                {
+                    System.out.println(p.colorName);
+                    PacketColorRefused pcf = new PacketColorRefused();
+                    c.sendTCP(pcf);
+                    System.out.println("wychodze nie akceptuje koloru");
+                    return;
+                }
+            }
+                 System.out.println("nie wychodze bo akceptuje kolor");
+                    PacketColorAccepted pca = new PacketColorAccepted();
+                    c.sendTCP(pca);
+            
+         }
+        
+        
         if (o instanceof PacketNotWantAgain) {
-            PacketExit p= new PacketExit();
+            PacketExit p = new PacketExit();
             ServerPrime.server.sendToAllTCP(p);
             System.exit(0);
-            
 
         }
         if (o instanceof PacketLoginRequested) {

@@ -45,6 +45,7 @@ public class GraphicalInterface extends Application {
     private final static int infoBarHeight = 80;      //constant variable which determines InfoBar Height
 
     static LoginWindow loginWindow;
+    static LoginWindow loginWindow2;
     private static String windowName = "Snake Multiplayer Game";
     private static int windowWidth = sizeWidth * 10;
     private static int windowHeight = (sizeHeight * 10) + infoBarHeight; //how many round have to be done until the game ends
@@ -120,6 +121,8 @@ public class GraphicalInterface extends Application {
         window.setTitle(windowName);        //window TITLE
         mainScene = new Scene(pane, windowWidth, windowHeight);//10 left padding, 40*20 tiles space, 10 right padding
         Snake snake = new Snake();
+        
+       loginWindow.getColorPanel();
         
         //EVENT FOR KEYBOARD
         EventHandler<KeyEvent> keyEventEventHandler;
