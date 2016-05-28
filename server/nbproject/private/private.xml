@@ -5,6 +5,8 @@
         <group>
             <file>file:/C:/Users/Mateusz/Desktop/Snake-Multiplayer-Game/server/src/serverprime/Packet.java</file>
             <file>file:/C:/Users/Mateusz/Desktop/Snake-Multiplayer-Game/server/src/serverprime/NetworkListener.java</file>
+            <file>file:/C:/Users/Mateusz/Desktop/Snake-Multiplayer-Game/server/src/serverprime/Enums.java</file>
+            <file>file:/C:/Users/Mateusz/Desktop/Snake-Multiplayer-Game/server/src/serverprime/ServerPrime.java</file>
         </group>
     </open-files>
 </project-private>

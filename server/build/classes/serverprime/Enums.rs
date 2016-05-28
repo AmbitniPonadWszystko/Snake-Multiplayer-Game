@@ -1,1 +1,0 @@
-serverprime.BarrierType
