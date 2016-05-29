@@ -1,5 +1,5 @@
 package serverprime;
-//sa imiona
+
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.minlog.Log;
@@ -24,8 +24,6 @@ public class NetworkListener extends Listener {
     private final static int sizeWidth = 120; // Width of our mask borad
     private final static int sizeHeight = 60; // Height of our mask borad
     private int tabDeadPlayer[] = new int[4];
-    private String playersNames[] = new String[4];
-    private int playersScore[] = new int[4];
     private int[] rewards = {0, 1, 2, 3};
     private int rewardPosition;
     private int playersAnsered;
@@ -81,7 +79,7 @@ public class NetworkListener extends Listener {
             player.color = "bg";
             player.id = c.getID();
             player.isAlive = true;
-            //player.name=playersNames[c.getID()];
+            player.score = 0;
             listOfPlayers.add(player); //adding next snake to list
 
             //ZMIENIC NAZWE NA PacketSetImage
@@ -121,8 +119,8 @@ public class NetworkListener extends Listener {
         }
         Log.info("New Tour");
         tour += 1;
-        for (int i = 0; i < 4; i++) {
-            playersScore[i] += tabDeadPlayer[i];
+        for (int i = 0; i < connectionCounter; i++) {
+            listOfPlayers.get(i).score += tabDeadPlayer[i];
         }
         Random generator = new Random();
         PacketNewTour newTour = new PacketNewTour();
@@ -134,10 +132,24 @@ public class NetworkListener extends Listener {
         newTour.y3 = generator.nextInt(sizeHeight - 2) + 1;
         newTour.x4 = generator.nextInt(sizeWidth - 2) + 1;
         newTour.y4 = generator.nextInt(sizeHeight - 2) + 1;
-        newTour.score1 = playersScore[0];
-        newTour.score2 = playersScore[1];
-        newTour.score3 = playersScore[2];
-        newTour.score4 = playersScore[3];
+        for(Player player : listOfPlayers)
+            {
+                switch (player.color){
+                        case "pink" :   
+                            newTour.score4 = player.score;
+                                break;
+                        case "blue" :
+                            newTour.score1 = player.score;
+                            break;
+                        case "orange":
+                            newTour.score3 = player.score;
+                            break;
+                        case "red" :
+                             newTour.score2 = player.score;
+                             break;
+                }
+            }
+        
         newTour.count = connectionCounter;
         newTour.tour = tour;
         ServerPrime.initBoard();
@@ -252,8 +264,8 @@ public class NetworkListener extends Listener {
             playersAnsered++;
             if (playersAnsered == connectionCounter) {
                 tour = 0;
-                for (int i = 0; i < 4; i++) {
-                    playersScore[i] = 0;
+                for (int i = 0; i < connectionCounter; i++) {
+                    listOfPlayers.get(i).score = 0;
                 }
                 for (int i = 0; i < 4; i++) {
                     tabDeadPlayer[i] = 0;
@@ -292,23 +304,15 @@ public class NetworkListener extends Listener {
         if (o instanceof PacketLoginRequested) {
             PacketLoginAccepted loginAnswer = new PacketLoginAccepted();
             if (connectionCounter < 5) {
-                String name = ((PacketLoginRequested) o).name;
-                playersNames[c.getID() - 1] = name;
+                String name = ((PacketLoginRequested) o).name;               
                 listOfPlayers.get(c.getID()-1).name=name;
-                //sentNames();
                 loginAnswer.accepted = true;
             } else {
                 loginAnswer.accepted = false;
             }
 
             c.sendUDP(loginAnswer);
-
-//            PacketNames pNames = new PacketNames();
-//            pNames.name1 = playersNames[0];
-//            pNames.name2 = playersNames[1];
-//            pNames.name3 = playersNames[2];
-//            pNames.name4 = playersNames[3];
-            
+ 
 
         }
 

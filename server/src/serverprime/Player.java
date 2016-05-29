@@ -19,4 +19,5 @@ public class Player {
     boolean isAlive;
     String name;
     String color;
+    int score;
 }
