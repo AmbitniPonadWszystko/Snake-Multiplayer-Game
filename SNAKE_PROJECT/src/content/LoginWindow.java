@@ -68,14 +68,15 @@ public class LoginWindow {
             if(Snake.isColorTaken == true){
                colors.getItems().remove(colors.getSelectedItem());
                colors.setSelectedItem(colors.getItems().get(0));
+               Snake.isAsking = false;
                e.consume();
                
             }
 
         });
-        
+       
         Optional<String> result = colors.showAndWait();
-        
+       
         GameConfiguration config = new GameConfiguration();
         config.color = colors.getSelectedItem();
         
@@ -95,7 +96,7 @@ public class LoginWindow {
         
         ButtonType loginButtonType = new ButtonType("Login", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
-
+        
         //image = new Image(getClass().getResourceAsStream("resources/bg.png"));
         String image = LoginWindow.class.getResource("resources/bg.png").toExternalForm();
         dialog.getDialogPane().setStyle("-fx-background-image: url('" + image + "'); "
