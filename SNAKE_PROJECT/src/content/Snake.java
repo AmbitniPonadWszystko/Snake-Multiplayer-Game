@@ -129,15 +129,6 @@ public class Snake extends Listener {
 
     }
 
-    public void initImages() {
-        String lol = "blue";
-        player1 = new Image(getClass().getResourceAsStream("resources/" + lol + ".png"));
-        player2 = new Image(getClass().getResourceAsStream("resources/red.png"));
-        player3 = new Image(getClass().getResourceAsStream("resources/yellow.png"));
-        player4 = new Image(getClass().getResourceAsStream("resources/pink.png"));
-        bg = new Image(getClass().getResourceAsStream("resources/bg.png"));
-
-    }
 
     //sending coordinates to server
     public void sendPoint() {

@@ -135,16 +135,16 @@ public class NetworkListener extends Listener {
         for(Player player : listOfPlayers)
             {
                 switch (player.color){
-                        case "pink" :   
+                        case "rozowy" :   
                             newTour.score4 = player.score;
                                 break;
-                        case "blue" :
+                        case "niebieski" :
                             newTour.score1 = player.score;
                             break;
-                        case "orange":
+                        case "pomaranczowy":
                             newTour.score3 = player.score;
                             break;
-                        case "red" :
+                        case "czerwony" :
                              newTour.score2 = player.score;
                              break;
                 }
@@ -169,16 +169,16 @@ public class NetworkListener extends Listener {
           for(Player player : listOfPlayers)
             {
                 switch (player.color){
-                        case "pink" :                      
+                        case "rozowy" :                      
                             pNames.name4 = player.name;
                                 break;
-                        case "blue" :
+                        case "niebieski" :
                             pNames.name1 = player.name;
                             break;
-                        case "orange":
+                        case "pomaranczowy":
                             pNames.name3 = player.name;
                             break;
-                        case "red" :
+                        case "czerwony" :
                              pNames.name2 = player.name;
                              break;
                 }
@@ -195,16 +195,16 @@ public class NetworkListener extends Listener {
         if (o instanceof PacketSendColor) {
             PacketSendColor p = (PacketSendColor) o;
             listOfPlayers.get(c.getID() - 1).color = p.color;
-            if ("blue".equals(p.color)) {
+            if ("niebieski".equals(p.color)) {
                 blue = 0;
             }
-            if ("red".equals(p.color)) {
+            if ("czerwony".equals(p.color)) {
                 red = 0;
             }
-            if ("orange".equals(p.color)) {
+            if ("pomaranczowy".equals(p.color)) {
                 orange = 0;
             }
-            if ("pink".equals(p.color)) {
+            if ("rozowy".equals(p.color)) {
                 pink = 0;
             }
 

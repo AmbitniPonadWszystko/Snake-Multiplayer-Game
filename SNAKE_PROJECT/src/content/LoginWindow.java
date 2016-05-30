@@ -38,16 +38,16 @@ public class LoginWindow {
         String image = LoginWindow.class.getResource("resources/bg.png").toExternalForm();        
         List<String> choices = new ArrayList<>();
         if (Snake.blue == 1) {
-            choices.add("blue");
+            choices.add("niebieski");
         }
         if (Snake.red == 1) {
-            choices.add("red");
+            choices.add("czerwony");
         }
         if (Snake.pink == 1) {
-            choices.add("pink");
+            choices.add("rozowy");
         }
         if (Snake.orange == 1) {
-            choices.add("orange");
+            choices.add("pomaranczowy");
         }
         
         colors = new ChoiceDialog<>(null, choices);
