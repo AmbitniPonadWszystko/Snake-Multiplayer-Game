@@ -26,6 +26,8 @@ public class LoginWindow {
     private Stage primaryStage;
     private TextField ipAdress;
     private TextField playerName;
+    private TextField port;
+    
     public static ChoiceDialog<String> colors;
     
     public LoginWindow(Stage primaryStage) {
@@ -108,6 +110,7 @@ public class LoginWindow {
         
         playerName = new TextField();
         ipAdress = new TextField();
+        port = new TextField();
         
         Label loginLabel = new Label("Login:");
         loginLabel.setStyle("-fx-text-fill: white;" + "-fx-font-weight: bold;");
@@ -117,6 +120,10 @@ public class LoginWindow {
         ipLabel.setStyle("-fx-text-fill: white;" + "-fx-font-weight: bold;");
         grid.add(ipLabel, 0, 1);
         grid.add(ipAdress, 1, 1);
+        Label portLabel = new Label("Port:");
+        portLabel.setStyle("-fx-text-fill: white;" + "-fx-font-weight: bold;");
+        grid.add(portLabel, 0, 2);
+        grid.add(port, 1, 2);
         
         dialog.getDialogPane().setContent(grid);
         
@@ -171,6 +178,9 @@ public class LoginWindow {
     
     public String getPlayerName() {
         return playerName.getText();
+    }
+    public int getPort() {
+        return Integer.parseInt(port.getText());
     }
     
     class GameConfiguration {

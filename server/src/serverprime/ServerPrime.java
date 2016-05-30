@@ -20,7 +20,7 @@ public class ServerPrime {
             //To bind the server to the ports, 
             //we simply call the bind method within our server object.
             //The order of ports is TCP, followed by UDP. 
-            server.bind(7474, 7474);
+            server.bind(50050, 50050);
             server.start();
 
         } catch (IOException ex) {
